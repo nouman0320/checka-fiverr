@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -79,6 +80,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private BottomSheetBehavior mBottomSheetBehavior;
     private Button btnMoreOptions;
 
+    private ImageView ivSearch;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         btnMoreOptions = findViewById(R.id.btn_options);
 
+        ivSearch = findViewById(R.id.imageViewSearch);
+
         btnMoreOptions.setVisibility(View.GONE);
 
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -99,8 +104,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if (newState == BottomSheetBehavior.STATE_HIDDEN){
                     btnMoreOptions.setVisibility(View.VISIBLE);
+                    //ivSearch.setVisibility(View.VISIBLE);
                 }
-                else btnMoreOptions.setVisibility(View.GONE);
+                else if(newState == BottomSheetBehavior.STATE_COLLAPSED){
+                    ivSearch.setVisibility(View.VISIBLE);
+                }
+                else if(newState == BottomSheetBehavior.STATE_HALF_EXPANDED){
+                    ivSearch.setVisibility(View.VISIBLE);
+                }
+                else {
+                    btnMoreOptions.setVisibility(View.GONE);
+                    ivSearch.setVisibility(View.GONE);
+                }
             }
 
             @Override

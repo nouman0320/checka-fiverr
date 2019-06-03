@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Checka</string>
+
+    <string-array name="services">
+        <item>Electricity</item>
+        <item>Water</item>
+        <item>Sewage</item>
+    </string-array>
+
+    <string-array name="problem_level">
+        <item>No Problem</item>
+        <item>Medium Problem</item>
+        <item>High Problem</item>
+    </string-array>
+
 </resources>

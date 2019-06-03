@@ -45,6 +45,10 @@ public class CheckPriceActivity extends AppCompatActivity {
       myPriceData.add(new Price("Item 2", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 2000.0));
       myPriceData.add(new Price("Item 3", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 3000.0));
       myPriceData.add(new Price("Item 4", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 4000.0));
+        myPriceData.add(new Price("Item 1", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 1000.0));
+        myPriceData.add(new Price("Item 2", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 2000.0));
+        myPriceData.add(new Price("Item 3", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 3000.0));
+        myPriceData.add(new Price("Item 4", "Street# 1, abc", "Jan 02, 2019", new LatLng(0,0), 4000.0));
 
         // specify an adapter (see also next example)
         mAdapter = new PriceAdapter(this, myPriceData);

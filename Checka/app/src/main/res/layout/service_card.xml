@@ -8,6 +8,7 @@
     android:orientation="vertical">
 
     <android.support.v7.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp">
@@ -52,6 +53,7 @@
                 android:textSize="10sp"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toBottomOf="@+id/tvAddress" />
+
 
             <TextView
                 android:id="@+id/tvLastUpdated"
@@ -111,6 +113,30 @@
                 card_view:layout_constraintStart_toEndOf="@+id/tvServiceType"
                 card_view:layout_constraintTop_toBottomOf="@+id/tvLastUpdated"
                 card_view:srcCompat="@drawable/ic_flash" />
+
+            <TextView
+                android:id="@+id/tvVotes"
+                android:layout_width="108dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginRight="12dp"
+                android:gravity="right"
+                android:text="Votes +1"
+                android:textSize="10sp"
+                card_view:layout_constraintEnd_toStartOf="@+id/imageView10"
+                card_view:layout_constraintTop_toBottomOf="@+id/imageView9" />
+
+            <ImageView
+                android:id="@+id/imageView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintTop_toBottomOf="@+id/imageView9"
+                card_view:srcCompat="@drawable/ic_testing" />
 
 
         </android.support.constraint.ConstraintLayout>
