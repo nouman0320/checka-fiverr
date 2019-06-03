@@ -26,7 +26,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toEndOf="@+id/imageView2"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_fuel"
+        app:srcCompat="@drawable/ic_service"
         tools:ignore="VectorDrawableCompat" />
 
     <TextView
@@ -36,7 +36,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
-        android:text="Fuel"
+        android:text="Service"
         android:textSize="18sp"
         app:layout_constraintStart_toEndOf="@+id/imageView7"
         app:layout_constraintTop_toTopOf="parent" />

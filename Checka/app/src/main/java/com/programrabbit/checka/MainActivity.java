@@ -64,10 +64,11 @@ import java.util.List;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+
     private PlacesClient placesClient;
     private List<AutocompletePrediction> predictionList;
 
+    private FusedLocationProviderClient mFusedLocationProviderClient;
     private Location mLastKnownLocation;
     private LocationCallback locationCallback;
 
@@ -275,7 +276,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         googleMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                        this, R.raw.style_json));
+                        this, R.raw.style_night_json));
 
         googleMap.getUiSettings().setMapToolbarEnabled(false);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

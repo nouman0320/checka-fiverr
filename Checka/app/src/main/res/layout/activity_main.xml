@@ -14,7 +14,7 @@
         android:background="@android:color/transparent"
         android:keepScreenOn="true"
         android:text="More Options"
-        android:textColor="@color/quantum_black_text"
+        android:textColor="@color/quantum_white_text"
         android:textSize="12sp"
         app:layout_anchor="@+id/map"
         app:layout_anchorGravity="bottom|center" />
