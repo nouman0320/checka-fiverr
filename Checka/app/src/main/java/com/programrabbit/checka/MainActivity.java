@@ -13,9 +13,11 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -82,6 +84,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private ImageView ivSearch;
 
+    private DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +99,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         ivSearch = findViewById(R.id.imageViewSearch);
 
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+
+
         btnMoreOptions.setVisibility(View.GONE);
 
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -104,7 +110,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if (newState == BottomSheetBehavior.STATE_HIDDEN){
                     btnMoreOptions.setVisibility(View.VISIBLE);
-                    //ivSearch.setVisibility(View.VISIBLE);
+                    ivSearch.setVisibility(View.VISIBLE);
                 }
                 else if(newState == BottomSheetBehavior.STATE_COLLAPSED){
                     ivSearch.setVisibility(View.VISIBLE);
@@ -169,6 +175,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onButtonClicked(int buttonCode) {
                 if(buttonCode == MaterialSearchBar.BUTTON_NAVIGATION){
                     // opening closing drawer layout
+                    mDrawerLayout.openDrawer(Gravity.START);
                 } else if (buttonCode == MaterialSearchBar.BUTTON_BACK){
                     materialSearchBar.disableSearch();
                 }
