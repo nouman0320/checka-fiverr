@@ -55,6 +55,9 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
 
         getSupportActionBar().hide();
 
+        iv_back = findViewById(R.id.iv_back);
+        fab= findViewById(R.id.fab);
+
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

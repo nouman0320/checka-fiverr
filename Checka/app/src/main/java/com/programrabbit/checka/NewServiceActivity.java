@@ -56,6 +56,10 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_service);
 
+
+        iv_back = findViewById(R.id.iv_back);
+        fab= findViewById(R.id.fab);
+
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
