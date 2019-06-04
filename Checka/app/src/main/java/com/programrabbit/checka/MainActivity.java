@@ -86,11 +86,20 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private DrawerLayout mDrawerLayout;
 
+
+    ImageView iv_service;
+    ImageView iv_fuel;
+    ImageView iv_price;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        iv_service = findViewById(R.id.iv_service);
+        iv_fuel = findViewById(R.id.iv_fuel);
+        iv_price = findViewById(R.id.iv_price);
 
         View bottomSheet = findViewById(R.id.bottom_sheet);
 
@@ -103,6 +112,36 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         btnMoreOptions.setVisibility(View.GONE);
+
+
+        iv_service.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(MainActivity.this, CheckServiceActivity.class);
+                MainActivity.this.startActivity(mainIntent);
+                //SignupActivity.this.finish();
+            }
+        });
+
+        iv_fuel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(MainActivity.this, CheckFuelAcitivity.class);
+                MainActivity.this.startActivity(mainIntent);
+                //SignupActivity.this.finish();
+            }
+        });
+
+
+        iv_price.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(MainActivity.this, CheckPriceActivity.class);
+                MainActivity.this.startActivity(mainIntent);
+                //SignupActivity.this.finish();
+            }
+        });
+
 
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override

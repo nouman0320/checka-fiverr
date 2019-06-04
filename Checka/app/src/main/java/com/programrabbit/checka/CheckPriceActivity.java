@@ -1,10 +1,14 @@
 package com.programrabbit.checka;
 
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -18,12 +22,33 @@ public class CheckPriceActivity extends AppCompatActivity {
 
     ArrayList<Price> myPriceData;
 
+    ImageView iv_back;
+    FloatingActionButton fab;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_price);
 
+        iv_back = findViewById(R.id.iv_back);
+        fab= findViewById(R.id.fab);
+
+
+        iv_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(CheckPriceActivity.this, NewPriceActivity.class);
+                CheckPriceActivity.this.startActivity(mainIntent);
+            }
+        });
 
         getSupportActionBar().hide();
 

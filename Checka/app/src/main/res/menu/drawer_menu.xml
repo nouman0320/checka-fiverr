@@ -3,18 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <item android:title="Profile">
-        <menu>
-            <item android:id="@+id/nav_login"
-                android:icon="@drawable/ic_login"
-                android:title="Login"/>
-
-            <item android:id="@+id/nav_register"
-                android:icon="@drawable/ic_register"
-                android:title="Register"/>
-        </menu>
-    </item>
-
     <item android:title="Account Settings">
         <menu>
             <item android:id="@+id/nav_settings"

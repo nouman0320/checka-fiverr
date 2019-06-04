@@ -1,10 +1,14 @@
 package com.programrabbit.checka;
 
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -16,6 +20,10 @@ public class CheckFuelAcitivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
+
+    ImageView iv_back;
+    FloatingActionButton fab;
+
     ArrayList<Fuel> myFuelData;
 
     @Override
@@ -23,6 +31,26 @@ public class CheckFuelAcitivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_check_fuel_acitivity);
+
+
+        iv_back = findViewById(R.id.iv_back);
+        fab= findViewById(R.id.fab);
+
+
+        iv_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(CheckFuelAcitivity.this, NewFuelActivity.class);
+                CheckFuelAcitivity.this.startActivity(mainIntent);
+            }
+        });
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
