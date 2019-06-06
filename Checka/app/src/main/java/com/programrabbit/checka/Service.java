@@ -2,6 +2,8 @@ package com.programrabbit.checka;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+
 public class Service {
     String name, address;
     int problemLevel;
@@ -12,6 +14,10 @@ public class Service {
     String uid;
     int voteCount;
 
+    ArrayList<String> positiveVoteUsers = new ArrayList<>();
+    ArrayList<String> negativeVoteUsers = new ArrayList<>();
+
+    public Service(){}
 
     public Service(String name, String address, int problemLevel, int serviceType, LatLng latLng, String lastUpdate, String uid, int voteCount) {
         this.name = name;
@@ -23,6 +29,26 @@ public class Service {
         this.lastUpdate = lastUpdate;
         this.uid = uid;
         this.voteCount = voteCount;
+
+        positiveVoteUsers = new ArrayList<>();
+        negativeVoteUsers = new ArrayList<>();
+    }
+
+
+    public ArrayList<String> getPositiveVoteUsers() {
+        return positiveVoteUsers;
+    }
+
+    public void setPositiveVoteUsers(ArrayList<String> positiveVoteUsers) {
+        this.positiveVoteUsers = positiveVoteUsers;
+    }
+
+    public ArrayList<String> getNegativeVoteUsers() {
+        return negativeVoteUsers;
+    }
+
+    public void setNegativeVoteUsers(ArrayList<String> negativeVoteUsers) {
+        this.negativeVoteUsers = negativeVoteUsers;
     }
 
     public double getLat() {
@@ -40,8 +66,6 @@ public class Service {
     public void setLng(double lng) {
         this.lng = lng;
     }
-
-    public Service(){}
 
     public String getUid() {
         return uid;

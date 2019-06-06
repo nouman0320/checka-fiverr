@@ -29,7 +29,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class CheckServiceActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private ServiceAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
 
@@ -37,6 +37,7 @@ public class CheckServiceActivity extends AppCompatActivity {
     FloatingActionButton fab;
 
     ArrayList<Service> myServiceData;
+    ArrayList<String> keys = new ArrayList<>();
 
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
@@ -109,19 +110,23 @@ public class CheckServiceActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference("Service");
         firebaseAuth = FirebaseAuth.getInstance();
 
+        mAdapter = new ServiceAdapter(CheckServiceActivity.this, myServiceData, keys);
+        recyclerView.setAdapter(mAdapter);
+
+
+
         progressDialog.show();
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<Service> s_list = new ArrayList<>();
-                ArrayList<String> keys = new ArrayList<>();
+                keys = new ArrayList<>();
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
                     s_list.add(ds.getValue(Service.class));
                     keys.add(ds.getKey());
                     Log.w("Firebase", ds.getValue(Service.class).name);
                     myServiceData = s_list;
-                    mAdapter = new ServiceAdapter(CheckServiceActivity.this, myServiceData, keys);
-                    recyclerView.setAdapter(mAdapter);
+                    mAdapter.add(myServiceData, keys);
                 }
                 progressDialog.dismiss();
             }

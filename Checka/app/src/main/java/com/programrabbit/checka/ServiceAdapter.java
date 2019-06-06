@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHolder> {
@@ -90,6 +91,27 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
         holder.iv_vote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                ArrayList<String> temp = service.getPositiveVoteUsers();
+                temp.addAll(service.negativeVoteUsers);
+                boolean valid = true;
+                for(int i=0;i<temp.size();i++)
+                {
+                    if(uid.equals(temp.get(i))){
+
+                        new MaterialStyledDialog.Builder(mContext)
+                                .setIcon(R.drawable.ic_testing)
+                                .setTitle("Vote")
+                                .setDescription("You have already voted for this service")
+                                .setHeaderColor(R.color.colorPrimary)
+                                .setPositiveText("Close")
+                                .show();
+                        return;
+                    }
+                }
+
+
                 new MaterialStyledDialog.Builder(mContext)
                         .setIcon(R.drawable.ic_testing)
                         .setTitle("Vote")
@@ -99,9 +121,14 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
                                 Toast.makeText(mContext, "+1", Toast.LENGTH_SHORT).show();
                                 FirebaseDatabase.getInstance().getReference("Service")
                                         .child(key+"/voteCount").setValue(service.getVoteCount()+1);
+                                service.getPositiveVoteUsers().add(uid);
+                                FirebaseDatabase.getInstance().getReference("Service")
+                                        .child(key+"/positiveVoteUsers").setValue(service.getPositiveVoteUsers());
+
                             }
                         })
                         .setNegativeText("-1")
@@ -166,5 +193,16 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
     @Override
     public int getItemCount() {
         return serviceList.size();
+    }
+
+    public void add(List<Service> sr, List<String> k){
+        try{
+            serviceList.clear();
+            serviceList.addAll(sr);
+            keys.clear();
+            keys.addAll(k);
+        }catch(Exception e){
+        }
+        notifyDataSetChanged();
     }
 }
