@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -22,6 +23,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -42,7 +44,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -60,10 +61,8 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 
@@ -78,7 +77,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationCallback locationCallback;
 
 
-    private MaterialSearchBar materialSearchBar;
     private View mapView;
 
     private BottomSheetBehavior mBottomSheetBehavior;
@@ -88,30 +86,45 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private DrawerLayout mDrawerLayout;
 
+    private ImageView iv_menu;
 
-    ImageView iv_service;
-    ImageView iv_fuel;
-    ImageView iv_price;
+    private ConstraintLayout cl_service;
+    private ConstraintLayout cl_fuel;
+    private ConstraintLayout cl_price;
+
+    private EditText et_search;
+
+    private TextView tv_service;
+    private TextView tv_fuel;
+    private TextView tv_price;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        TextView tx = (TextView)findViewById(R.id.motd);
         Typeface custom_font = Typeface.createFromAsset(getAssets(),  "fonts/MYRIADPRO-REGULAR.OTF");
-        tx.setTypeface(custom_font);
 
+        tv_service = findViewById(R.id.tv_service);
+        tv_fuel = findViewById(R.id.tv_fuel);
+        tv_price = findViewById(R.id.tv_price);
 
-        iv_service = findViewById(R.id.iv_service);
-        iv_fuel = findViewById(R.id.iv_fuel);
-        iv_price = findViewById(R.id.iv_price);
+        tv_service.setTypeface(custom_font);
+        tv_fuel.setTypeface(custom_font);
+        tv_price.setTypeface(custom_font);
+
+        et_search = findViewById(R.id.et_search);
+        et_search.setTypeface(custom_font);
+
+        cl_service = findViewById(R.id.cl_service);
+        cl_fuel = findViewById(R.id.cl_fuel);
+        cl_price = findViewById(R.id.cl_price);
 
         View bottomSheet = findViewById(R.id.bottom_sheet);
 
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         btnMoreOptions = findViewById(R.id.btn_options);
+        btnMoreOptions.setTypeface(custom_font);
 
         ivSearch = findViewById(R.id.imageViewSearch);
 
@@ -121,7 +134,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         btnMoreOptions.setVisibility(View.GONE);
 
 
-        iv_service.setOnClickListener(new View.OnClickListener() {
+        iv_menu = findViewById(R.id.iv_menu);
+
+        iv_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDrawerLayout.openDrawer(Gravity.START);
+            }
+        });
+
+
+        cl_service.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent mainIntent = new Intent(MainActivity.this, CheckServiceActivity.class);
@@ -130,7 +153,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        iv_fuel.setOnClickListener(new View.OnClickListener() {
+        cl_fuel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent mainIntent = new Intent(MainActivity.this, CheckFuelAcitivity.class);
@@ -140,7 +163,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-        iv_price.setOnClickListener(new View.OnClickListener() {
+        cl_price.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent mainIntent = new Intent(MainActivity.this, CheckPriceActivity.class);
@@ -184,18 +207,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-        materialSearchBar = findViewById(R.id.searchBar);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
         mapView = mapFragment.getView();
+        /*
         View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 // position on right bottom
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        rlp.setMargins(0, 360, 220, 0);
+        rlp.setMargins(0, 360, 220, 0);*/
 
 
         mapFragment.getMapAsync(this);
@@ -204,135 +227,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Places.initialize(MainActivity.this, "AIzaSyC9d4khZy2rzPtpwIzFvr4J7BzJypHPUK0");
         placesClient = Places.createClient(this);
         final AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
-
-        materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
-            @Override
-            public void onSearchStateChanged(boolean enabled) {
-
-            }
-
-            @Override
-            public void onSearchConfirmed(CharSequence text) {
-                startSearch(text.toString(), true, null, true);
-
-            }
-
-            @Override
-            public void onButtonClicked(int buttonCode) {
-                if(buttonCode == MaterialSearchBar.BUTTON_NAVIGATION){
-                    // opening closing drawer layout
-                    mDrawerLayout.openDrawer(Gravity.START);
-                } else if (buttonCode == MaterialSearchBar.BUTTON_BACK){
-                    materialSearchBar.disableSearch();
-                }
-            }
-        });
-
-
-
-        materialSearchBar.addTextChangeListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d("TextChanged", start +" "+before + " "+ count);
-                if(count == 0)
-                    materialSearchBar.clearSuggestions();
-
-                final FindAutocompletePredictionsRequest predictionsRequest = FindAutocompletePredictionsRequest.builder()
-                        .setTypeFilter(TypeFilter.ADDRESS)
-                        .setSessionToken(token)
-                        .setQuery(s.toString())
-                        .build();
-
-
-
-                placesClient.findAutocompletePredictions(predictionsRequest).addOnCompleteListener(new OnCompleteListener<FindAutocompletePredictionsResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
-                        if(task.isSuccessful()){
-                            FindAutocompletePredictionsResponse predictionsResponse = task.getResult();
-                            if(predictionsResponse != null){
-                                predictionList = predictionsResponse.getAutocompletePredictions();
-                                List<String> suggestionList = new ArrayList<>();
-                                for(int i=0;i<predictionList.size();i++){
-                                    AutocompletePrediction prediction = predictionList.get(i);
-                                    suggestionList.add(prediction.getFullText(null).toString());
-                                }
-
-                                materialSearchBar.updateLastSuggestions(suggestionList);
-                                if(!materialSearchBar.isSuggestionsVisible()){
-                                    materialSearchBar.showSuggestionsList();
-                                }
-                            }
-                        } else {
-                            Log.i("ERROR", "Prediction fetching task unsuccessful");
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                Toast.makeText(getBaseContext(),"after text changed", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        materialSearchBar.setSuggestionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
-            @Override
-            public void OnItemClickListener(int position, View v) {
-                if(position >= predictionList.size()){
-                    return;
-                }
-                AutocompletePrediction selectedPrediction = predictionList.get(position);
-                String suggestion = materialSearchBar.getLastSuggestions().get(position).toString();
-                materialSearchBar.setText(suggestion);
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        materialSearchBar.clearSuggestions();
-                    }
-                }, 1000);
-                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                if(imm != null)
-                    imm.hideSoftInputFromWindow(materialSearchBar.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-                final String placeId = selectedPrediction.getPlaceId();
-                List<Place.Field> placeFields = Arrays.asList(Place.Field.LAT_LNG);
-
-                FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.builder(placeId, placeFields).build();
-                placesClient.fetchPlace(fetchPlaceRequest).addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>() {
-                    @Override
-                    public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
-                        Place place = fetchPlaceResponse.getPlace();
-                        Log.i("mytag", "Place found: " + place.getName());
-                        LatLng latLngOfPlace = place.getLatLng();
-                        if(latLngOfPlace != null){
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngOfPlace, 18));
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        if(e instanceof ApiException){
-                            ApiException apiException = (ApiException) e;
-                            apiException.printStackTrace();
-                            int statusCode = apiException.getStatusCode();
-                            Log.i("mytag", "place not found: " + e.getMessage());
-                            Log.i("mytag", "status code: " + statusCode);
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void OnItemDeleteListener(int position, View v) {
-
-            }
-        });
 
 
     }
