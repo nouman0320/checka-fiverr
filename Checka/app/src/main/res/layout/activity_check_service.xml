@@ -15,7 +15,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_arrow_left_black_48dp" />
+        app:srcCompat="@drawable/ic_left_arrow" />
 
     <ImageView
         android:id="@+id/imageView7"

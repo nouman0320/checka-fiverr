@@ -16,12 +16,21 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class SplashActivity extends AppCompatActivity {
-    private final int SPLASH_DISPLAY_LENGTH = 2000;
+    private final int SPLASH_DISPLAY_LENGTH = 400;
 
     private Context mContext= SplashActivity.this;
     private static final int REQUEST = 112;
 
+    DatabaseReference databaseReference;
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +68,10 @@ public class SplashActivity extends AppCompatActivity {
 
             }
         }, SPLASH_DISPLAY_LENGTH);
+
+
+        databaseReference = FirebaseDatabase.getInstance().getReference("User");
+        firebaseAuth = FirebaseAuth.getInstance();
     }
 
 
@@ -93,14 +106,53 @@ public class SplashActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
         Boolean loggedIn = prefs.getBoolean("loggedin", false);
 
-        if(loggedIn){
-            Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-            SplashActivity.this.startActivity(mainIntent);
-            SplashActivity.this.finish();
-        }else{
+        if(!loggedIn){
             Intent mainIntent = new Intent(SplashActivity.this, LoginActivity.class);
             SplashActivity.this.startActivity(mainIntent);
             SplashActivity.this.finish();
         }
+        else
+        {
+
+
+            final String email = prefs.getString("email", "null@null.com");
+            final String password = prefs.getString("password", "123456");
+
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(SplashActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                //Toast.makeText(getApplicationContext(), "logged in", Toast.LENGTH_LONG).show();
+
+                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putBoolean("loggedin", true);
+                                editor.putString("email", email);
+                                editor.putString("password", password);
+                                editor.apply();
+
+                                Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+                                SplashActivity.this.startActivity(mainIntent);
+                                SplashActivity.this.finish();
+
+                            } else {
+                                Toast.makeText(getApplicationContext(), task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
+
+                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putBoolean("loggedin", false);
+                                editor.remove("email");
+                                editor.remove("password");
+                                editor.apply();
+
+                                Intent mainIntent = new Intent(SplashActivity.this, LoginActivity.class);
+                                SplashActivity.this.startActivity(mainIntent);
+                                SplashActivity.this.finish();
+                            }
+                        }
+                    });
+        }
+
     }
 }

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "545757444914",
+    "firebase_url": "https://checka-8802c.firebaseio.com",
+    "project_id": "checka-8802c",
+    "storage_bucket": "checka-8802c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545757444914:android:a5d0308a8f35ada6",
+        "android_client_info": {
+          "package_name": "com.programrabbit.checka"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "545757444914-rdbb7b4l8agvkrs9k13a8mi8lluga9up.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.programrabbit.checka",
+            "certificate_hash": "97b4898a1348541cbada60ef6a7666b170ab52f9"
+          }
+        },
+        {
+          "client_id": "545757444914-c7q8at0ce8dlabqhoksb2qijnumeam66.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzx-vWPnVEyrYv93hjxmL4S7e1pUy8-JU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "545757444914-c7q8at0ce8dlabqhoksb2qijnumeam66.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

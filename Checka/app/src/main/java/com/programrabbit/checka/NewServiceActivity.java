@@ -2,19 +2,24 @@ package com.programrabbit.checka;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -39,6 +44,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import dmax.dialog.SpotsDialog;
 
 public class NewServiceActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -51,23 +67,30 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
     ImageView iv_back;
     FloatingActionButton fab;
 
+    EditText et_location_name, et_address;
+
+    DatabaseReference databaseReference;
+    FirebaseAuth firebaseAuth;
+
+    private AlertDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_service);
 
+        progressDialog = new SpotsDialog(this, R.style.Custom);
+
+        final int[] problemLevel = new int[1];
+        final int[] serviceType = new int[1];
+
+        et_location_name = findViewById(R.id.et_location_name);
+        et_address = findViewById(R.id.et_address);
 
         iv_back = findViewById(R.id.iv_back);
         fab= findViewById(R.id.fab);
 
         iv_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -85,13 +108,7 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
         serviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 1) {
-
-                } else if (i == 2) {
-
-                } else if (i == 3) {
-
-                }
+               serviceType[0] = i;
             }
 
             @Override
@@ -112,13 +129,7 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
         problemSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 1) {
-
-                } else if (i == 2) {
-
-                } else if (i == 3) {
-
-                }
+                problemLevel[0] = i;
             }
 
             @Override
@@ -144,6 +155,68 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
 
         mapFragment.getMapAsync(this);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(NewServiceActivity.this);
+
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String name = et_location_name.getText().toString();
+                String address = et_address.getText().toString();
+
+
+                int vCount = 0;
+
+                if(TextUtils.isEmpty(name)){
+                    et_location_name.setError("Location name can not be empty");
+                    vCount++;
+                }
+
+                if(TextUtils.isEmpty(address)){
+                    et_address.setError("Address can not be empty");
+                    vCount++;
+                }
+
+                if(vCount>0)
+                    return;
+
+                progressDialog.show();
+
+                int t_problemLevel = problemLevel[0];
+                int t_serviceType = serviceType[0];
+
+                LatLng latLng = mMap.getCameraPosition().target;
+
+                DateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy  HH:mm");
+                Date datex = new Date();
+                String date = dateFormat.format(datex);
+
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                String child_uid = databaseReference.push().getKey();
+
+                Service service = new Service(name, address, t_problemLevel, t_serviceType,latLng,date,uid,0);
+                FirebaseDatabase.getInstance().getReference("Service")
+                        .child(child_uid)
+                        .setValue(service)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Updated", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Unable to add the service right now", Toast.LENGTH_SHORT).show();
+                                }
+                                progressDialog.dismiss();
+                            }
+                        });
+
+            }
+        });
+
+        databaseReference = FirebaseDatabase.getInstance().getReference("Service");
+        firebaseAuth = FirebaseAuth.getInstance();
     }
 
     @Override

@@ -6,17 +6,57 @@ public class Service {
     String name, address;
     int problemLevel;
     int serviceType;
-    LatLng latLng;
+    double lat;
+    double lng;
     String lastUpdate;
+    String uid;
+    int voteCount;
 
 
-    public Service(String name, String address, int problemLevel, int serviceType, LatLng latLng, String lastUpdate) {
+    public Service(String name, String address, int problemLevel, int serviceType, LatLng latLng, String lastUpdate, String uid, int voteCount) {
         this.name = name;
         this.address = address;
         this.problemLevel = problemLevel;
         this.serviceType = serviceType;
-        this.latLng = latLng;
+        this.lat = latLng.latitude;
+        this.lng = latLng.longitude;
         this.lastUpdate = lastUpdate;
+        this.uid = uid;
+        this.voteCount = voteCount;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+
+    public Service(){}
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public int getVoteCount() {
+        return voteCount;
+    }
+
+    public void setVoteCount(int voteCount) {
+        this.voteCount = voteCount;
     }
 
     public int getServiceType() {
@@ -49,14 +89,6 @@ public class Service {
 
     public void setProblemLevel(int problemLevel) {
         this.problemLevel = problemLevel;
-    }
-
-    public LatLng getLatLng() {
-        return latLng;
-    }
-
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
     }
 
     public String getLastUpdate() {
