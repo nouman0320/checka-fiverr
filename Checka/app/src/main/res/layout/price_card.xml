@@ -102,11 +102,11 @@
                 android:gravity="right"
                 android:text="Votes +1"
                 android:textSize="10sp"
-                card_view:layout_constraintEnd_toStartOf="@+id/imageView10"
+                card_view:layout_constraintEnd_toStartOf="@+id/iv_vote"
                 card_view:layout_constraintTop_toBottomOf="@+id/imageView9" />
 
             <ImageView
-                android:id="@+id/imageView10"
+                android:id="@+id/iv_vote"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"

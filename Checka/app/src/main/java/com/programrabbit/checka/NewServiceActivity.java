@@ -3,6 +3,7 @@ package com.programrabbit.checka;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -55,6 +56,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import dmax.dialog.SpotsDialog;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class NewServiceActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -73,6 +75,11 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
     FirebaseAuth firebaseAuth;
 
     private AlertDialog progressDialog;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

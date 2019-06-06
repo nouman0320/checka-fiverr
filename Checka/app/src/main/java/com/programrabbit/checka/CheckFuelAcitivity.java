@@ -1,5 +1,6 @@
 package com.programrabbit.checka;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class CheckFuelAcitivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -25,6 +28,11 @@ public class CheckFuelAcitivity extends AppCompatActivity {
     FloatingActionButton fab;
 
     ArrayList<Fuel> myFuelData;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

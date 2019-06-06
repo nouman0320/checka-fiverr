@@ -1,6 +1,7 @@
 package com.programrabbit.checka;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import dmax.dialog.SpotsDialog;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class CheckServiceActivity extends AppCompatActivity {
 
@@ -42,10 +44,18 @@ public class CheckServiceActivity extends AppCompatActivity {
     private AlertDialog progressDialog;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_service);
         getSupportActionBar().hide();
+
+        progressDialog = new SpotsDialog(this, R.style.Custom);
+
 
 
         iv_back = findViewById(R.id.iv_back);
@@ -91,8 +101,7 @@ public class CheckServiceActivity extends AppCompatActivity {
         */
 
         // specify an adapter (see also next example)
-        mAdapter = new ServiceAdapter(this, myServiceData);
-        recyclerView.setAdapter(mAdapter);
+
 
 
 
@@ -100,19 +109,27 @@ public class CheckServiceActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference("Service");
         firebaseAuth = FirebaseAuth.getInstance();
 
+        progressDialog.show();
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<Service> s_list = new ArrayList<>();
+                ArrayList<String> keys = new ArrayList<>();
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
                     s_list.add(ds.getValue(Service.class));
+                    keys.add(ds.getKey());
                     Log.w("Firebase", ds.getValue(Service.class).name);
+                    myServiceData = s_list;
+                    mAdapter = new ServiceAdapter(CheckServiceActivity.this, myServiceData, keys);
+                    recyclerView.setAdapter(mAdapter);
                 }
+                progressDialog.dismiss();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w("Firebase", "onCancelled", databaseError.toException());
+                progressDialog.dismiss();
             }
         });
     }

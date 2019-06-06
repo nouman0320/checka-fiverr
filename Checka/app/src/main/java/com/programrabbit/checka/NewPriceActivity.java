@@ -2,6 +2,7 @@ package com.programrabbit.checka;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -37,6 +38,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -47,6 +50,11 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
 
     ImageView iv_back;
     FloatingActionButton fab;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

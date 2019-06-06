@@ -8,4 +8,7 @@
     <color name="colorSecondaryText">#757575</color>
     <color name="icons">#212121</color>
     <color name="divider">#BDBDBD</color>
+    <color name="card_positive">#E9F7D6</color>
+    <color name="card_negative">#F5E4E4</color>
+    <color name="card_neutral">#D8DBF1</color>
 </resources>
