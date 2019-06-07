@@ -14,7 +14,8 @@
         android:roundIcon="@mipmap/ic_checka_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DetailServiceActivity"></activity>
+        <activity android:name=".DetailFuelActivity"></activity>
+        <activity android:name=".DetailServiceActivity" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
@@ -26,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SignupActivity" />
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".LoginActivity" />
         <activity android:name=".NewPriceActivity" />
         <activity android:name=".NewServiceActivity" />
         <activity android:name=".CheckPriceActivity" />

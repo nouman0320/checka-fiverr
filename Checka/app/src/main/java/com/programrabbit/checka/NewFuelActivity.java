@@ -2,6 +2,7 @@ package com.programrabbit.checka;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -13,9 +14,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -37,7 +41,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -51,6 +63,15 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
     ImageView iv_back;
     FloatingActionButton fab;
 
+    EditText et_name;
+    EditText et_address;
+    Switch sb_availability;
+
+    DatabaseReference databaseReference;
+    FirebaseAuth firebaseAuth;
+
+    private AlertDialog progressDialog;
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -60,12 +81,17 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_fuel);
-
         getSupportActionBar().hide();
+
+        progressDialog = new SpotsDialog(this, R.style.Custom);
 
 
         iv_back = findViewById(R.id.iv_back);
         fab= findViewById(R.id.fab);
+
+        et_name = findViewById(R.id.et_location_name);
+        et_address = findViewById(R.id.et_address);
+        sb_availability = findViewById(R.id.sb_availability);
 
 
         iv_back.setOnClickListener(new View.OnClickListener() {
@@ -75,12 +101,7 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               finish();
-            }
-        });
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -96,6 +117,64 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
 
         mapFragment.getMapAsync(this);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(NewFuelActivity.this);
+
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //finish();
+                String name = et_name.getText().toString();
+                String address = et_address.getText().toString();
+
+                int vCount = 0;
+
+                if(TextUtils.isEmpty(name)){
+                    et_name.setError("Location name can not be empty");
+                    vCount++;
+                }
+
+                if(TextUtils.isEmpty(address)){
+                    et_address.setError("Address can not be empty");
+                    vCount++;
+                }
+
+                if(vCount>0)
+                    return;
+
+                progressDialog.show();
+
+                boolean availability = sb_availability.isChecked();
+
+                LatLng latLng = mMap.getCameraPosition().target;
+
+                DateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy  HH:mm");
+                Date datex = new Date();
+                String date = dateFormat.format(datex);
+
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                String child_uid = databaseReference.push().getKey();
+
+                Fuel fuel = new Fuel(name,address,latLng.latitude, latLng.longitude,availability,date,uid,0);
+                FirebaseDatabase.getInstance().getReference("Fuel")
+                        .child(child_uid)
+                        .setValue(fuel)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Updated", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Unable to add the fuel update right now", Toast.LENGTH_SHORT).show();
+                                }
+                                progressDialog.dismiss();
+                            }
+                        });
+            }
+        });
+        databaseReference = FirebaseDatabase.getInstance().getReference("Fuel");
+        firebaseAuth = FirebaseAuth.getInstance();
     }
 
 
