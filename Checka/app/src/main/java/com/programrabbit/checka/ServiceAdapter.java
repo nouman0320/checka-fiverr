@@ -1,6 +1,7 @@
 package com.programrabbit.checka;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -31,7 +32,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name, address, lastUpdate, service, vote;
-        public ImageView availibility, serviceImageView, iv_vote;
+        public ImageView availibility, serviceImageView, iv_vote, iv_map;
         public CardView cardView;
 
 
@@ -46,6 +47,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
             serviceImageView = view.findViewById(R.id.imageViewService);
             cardView = view.findViewById(R.id.cardView);
             iv_vote = view.findViewById(R.id.iv_vote);
+            iv_map = view.findViewById(R.id.iv_map);
         }
     }
 
@@ -87,6 +89,16 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
             holder.vote.setText("Votes " + service.getVoteCount());
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_negative));
         }
+
+        holder.iv_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(mContext, DetailServiceActivity.class);
+                i.putExtra("key", key);
+                i.putExtra("service", service);
+                mContext.startActivity(i);
+            }
+        });
 
         holder.iv_vote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,6 +148,11 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 Toast.makeText(mContext, "-1", Toast.LENGTH_SHORT).show();
+                                FirebaseDatabase.getInstance().getReference("Service")
+                                        .child(key+"/voteCount").setValue(service.getVoteCount()-1);
+                                service.getPositiveVoteUsers().add(uid);
+                                FirebaseDatabase.getInstance().getReference("Service")
+                                        .child(key+"/negativeVoteUsers").setValue(service.getPositiveVoteUsers());
                             }
                         })
                         .setNeutralText("Cancel")

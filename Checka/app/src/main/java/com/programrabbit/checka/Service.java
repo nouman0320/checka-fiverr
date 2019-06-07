@@ -2,9 +2,10 @@ package com.programrabbit.checka;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Service {
+public class Service implements Serializable {
     String name, address;
     int problemLevel;
     int serviceType;
@@ -12,6 +13,7 @@ public class Service {
     double lng;
     String lastUpdate;
     String uid;
+    String uid_updated;
     int voteCount;
 
     ArrayList<String> positiveVoteUsers = new ArrayList<>();
@@ -34,6 +36,13 @@ public class Service {
         negativeVoteUsers = new ArrayList<>();
     }
 
+    public String getUid_updated() {
+        return uid_updated;
+    }
+
+    public void setUid_updated(String uid_updated) {
+        this.uid_updated = uid_updated;
+    }
 
     public ArrayList<String> getPositiveVoteUsers() {
         return positiveVoteUsers;

@@ -27,6 +27,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Service"
                 android:textSize="14sp"
+                android:inputType="textNoSuggestions"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toTopOf="parent" />
 
@@ -37,7 +38,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="8dp"
-                android:inputType="textMultiLine"
+                android:inputType="textNoSuggestions"
                 android:text="Address"
                 android:textSize="10sp"
                 card_view:layout_constraintStart_toStartOf="parent"
@@ -52,6 +53,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Service"
                 android:textSize="10sp"
+                android:inputType="textNoSuggestions"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toBottomOf="@+id/tvAddress" />
 
@@ -63,6 +65,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginLeft="16dp"
                 android:text="Last updated"
+                android:inputType="textNoSuggestions"
                 android:textSize="10sp"
                 card_view:layout_constraintBottom_toBottomOf="@+id/imageViewService"
                 card_view:layout_constraintStart_toEndOf="@+id/imageViewService" />
@@ -76,6 +79,7 @@
                 android:layout_marginTop="20dp"
                 android:text="Availablility"
                 android:textSize="10sp"
+                android:inputType="textNoSuggestions"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toBottomOf="@+id/tvServiceType" />
 
@@ -92,7 +96,7 @@
                 tools:ignore="VectorDrawableCompat" />
 
             <ImageView
-                android:id="@+id/imageView9"
+                android:id="@+id/iv_map"
                 android:layout_width="38dp"
                 android:layout_height="34dp"
                 android:layout_marginEnd="16dp"
@@ -120,6 +124,7 @@
                 android:gravity="right"
                 android:text="Votes +1"
                 android:textSize="10sp"
+                android:inputType="textNoSuggestions"
                 card_view:layout_constraintBottom_toTopOf="@+id/iv_vote"
                 card_view:layout_constraintEnd_toEndOf="@+id/iv_vote"
                 card_view:layout_constraintHorizontal_bias="0.904"

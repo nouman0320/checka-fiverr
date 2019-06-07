@@ -124,9 +124,17 @@ public class CheckServiceActivity extends AppCompatActivity {
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
                     s_list.add(ds.getValue(Service.class));
                     keys.add(ds.getKey());
-                    Log.w("Firebase", ds.getValue(Service.class).name);
-                    myServiceData = s_list;
-                    mAdapter.add(myServiceData, keys);
+                    if(ds.getValue(Service.class).name == null){
+                        databaseReference.child(ds.getKey()).removeValue();
+                        Intent i = new Intent(CheckServiceActivity.this, CheckServiceActivity.class);
+                        startActivity(i);
+                        finish();
+                    }
+                    else{
+                        Log.w("Firebase", ds.getValue(Service.class).name);
+                        myServiceData = s_list;
+                        mAdapter.add(myServiceData, keys);
+                    }
                 }
                 progressDialog.dismiss();
             }

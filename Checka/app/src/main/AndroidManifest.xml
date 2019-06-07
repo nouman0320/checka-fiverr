@@ -14,9 +14,10 @@
         android:roundIcon="@mipmap/ic_checka_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".DetailServiceActivity"></activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,10 +25,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".SignupActivity" />
-        <activity android:name=".LoginActivity">
-        </activity>
+        <activity android:name=".LoginActivity"></activity>
         <activity android:name=".NewPriceActivity" />
         <activity android:name=".NewServiceActivity" />
         <activity android:name=".CheckPriceActivity" />
