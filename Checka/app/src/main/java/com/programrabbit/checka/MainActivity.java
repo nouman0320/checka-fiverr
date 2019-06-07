@@ -2,6 +2,7 @@ package com.programrabbit.checka;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -29,8 +30,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -49,6 +53,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -56,6 +61,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -71,15 +77,22 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,NavigationView.OnNavigationItemSelectedListener {
     private GoogleMap mMap;
 
     private PlacesClient placesClient;
@@ -112,6 +125,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView tv_fuel;
     private TextView tv_price;
 
+    private AlertDialog progressDialog;
+
+    DatabaseReference priceDatabaseReference;
+    DatabaseReference fuelDatabaseReference;
+    DatabaseReference serviceDatabaseReference;
+    FirebaseAuth firebaseAuth;
+
+    ArrayList<Price> price = new ArrayList<>();
+    ArrayList<Fuel> fuel = new ArrayList<>();
+    ArrayList<Service> service = new ArrayList<>();
+
+    ArrayList<String> pkeys = new ArrayList<>();
+    ArrayList<String> fkeys = new ArrayList<>();
+    ArrayList<String> skeys = new ArrayList<>();
+
+    ArrayList<Integer> p_i = new ArrayList<>();
+    ArrayList<Integer> s_i = new ArrayList<>();
+    ArrayList<Integer> f_i = new ArrayList<>();
+
+
+    ArrayList<Marker> pSearchMarkers = new ArrayList<>();
+    ArrayList<Marker> sSearchMarkers = new ArrayList<>();
+    ArrayList<Marker> fSearchMarkers = new ArrayList<>();
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -122,6 +159,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setNavigationViewListner();
+
+        progressDialog = new SpotsDialog(this, R.style.Custom);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         Typeface custom_font = Typeface.createFromAsset(getAssets(),  "fonts/MYRIADPRO-REGULAR.OTF");
 
@@ -136,6 +177,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         et_search = findViewById(R.id.et_search);
         et_search.setTypeface(custom_font);
+        et_search.setSelected(false);
 
         cl_service = findViewById(R.id.cl_service);
         cl_fuel = findViewById(R.id.cl_fuel);
@@ -250,6 +292,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         final AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
 
+        et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    queryAndDisplayMarkers(et_search.getText().toString());
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+        priceDatabaseReference = FirebaseDatabase.getInstance().getReference("Price");
+        fuelDatabaseReference = FirebaseDatabase.getInstance().getReference("Fuel");
+        serviceDatabaseReference = FirebaseDatabase.getInstance().getReference("Service");
+        firebaseAuth = FirebaseAuth.getInstance();
+
+
     }
 
     @Override
@@ -310,9 +370,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
+        /*
         mMap.addMarker(new MarkerOptions().position(new LatLng(30.2316056, 71.4917693))
                 .title("Test marker"))
-                .setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
+                .setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));*/
+
+
 
         Toast.makeText(getBaseContext(),"map is ready",
                 Toast.LENGTH_SHORT).show();
@@ -401,5 +464,231 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private void setNavigationViewListner() {
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+
+    void queryAndDisplayMarkers(String query){
+        progressDialog.show();
+
+
+        price.clear();
+        service.clear();
+        fuel.clear();
+
+        pkeys.clear();
+        skeys.clear();
+        fkeys.clear();
+
+        p_i.clear();
+        s_i.clear();
+        f_i.clear();
+
+        for(int i=0;i<pSearchMarkers.size();i++)
+            pSearchMarkers.get(i).remove();
+        pSearchMarkers.clear();
+
+        for(int i=0;i<sSearchMarkers.size();i++)
+            sSearchMarkers.get(i).remove();
+        sSearchMarkers.clear();
+
+        for(int i=0;i<fSearchMarkers.size();i++)
+            fSearchMarkers.get(i).remove();
+        fSearchMarkers.clear();
+
+
+        priceDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<Price> s_list = new ArrayList<>();
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    s_list.add(ds.getValue(Price.class));
+                    pkeys.add(ds.getKey());
+                    if(ds.getValue(Price.class).name == null){
+                        priceDatabaseReference.child(ds.getKey()).removeValue();
+                    }
+                    else{
+                        price = s_list;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("Firebase", "onCancelled", databaseError.toException());
+            }
+        });
+
+
+        fuelDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<Fuel> s_list = new ArrayList<>();
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    s_list.add(ds.getValue(Fuel.class));
+                    fkeys.add(ds.getKey());
+                    if(ds.getValue(Fuel.class).name == null){
+                        fuelDatabaseReference.child(ds.getKey()).removeValue();
+                    }
+                    else{
+                        fuel = s_list;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("Firebase", "onCancelled", databaseError.toException());
+            }
+        });
+
+
+        serviceDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<Service> s_list = new ArrayList<>();
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    s_list.add(ds.getValue(Service.class));
+                    skeys.add(ds.getKey());
+                    if(ds.getValue(Service.class).name == null){
+                        serviceDatabaseReference.child(ds.getKey()).removeValue();
+                    }
+                    else{
+                        service = s_list;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("Firebase", "onCancelled", databaseError.toException());
+            }
+        });
+
+
+
+
+
+        for(int i=0;i<price.size();i++){
+            Price p = price.get(i);
+            if(contains(p.getName(), query) || contains(p.getAddress(), query))
+                p_i.add(i);
+        }
+
+        for(int i=0;i<service.size();i++){
+            Service s = service.get(i);
+            if(contains(s.getName(), query) || contains(s.getAddress(), query))
+                s_i.add(i);
+        }
+
+        for(int i=0;i<fuel.size();i++){
+            Fuel f = fuel.get(i);
+            if(contains(f.getName(), query) || contains(f.getAddress(), query))
+                f_i.add(i);
+        }
+
+
+        ArrayList<LatLng> allMarkerPositions = new ArrayList<>();
+
+        for(int i=0;i<p_i.size();i++){
+            LatLng latLng = new LatLng(price.get(p_i.get(i)).lat,price.get(p_i.get(i)).lng);
+            allMarkerPositions.add(latLng);
+            Marker temp = mMap.addMarker(new MarkerOptions()
+                            .position(latLng));
+            temp.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
+
+        }
+
+
+        for(int i=0;i<s_i.size();i++){
+            LatLng latLng = new LatLng(service.get(s_i.get(i)).lat,service.get(s_i.get(i)).lng);
+            allMarkerPositions.add(latLng);
+            Marker temp = mMap.addMarker(new MarkerOptions()
+                    .position(latLng));
+            temp.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
+
+        }
+
+
+        for(int i=0;i<f_i.size();i++){
+            LatLng latLng = new LatLng(fuel.get(f_i.get(i)).lat,fuel.get(f_i.get(i)).lng);
+            allMarkerPositions.add(latLng);
+            Marker temp = mMap.addMarker(new MarkerOptions()
+                    .position(latLng));
+            temp.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
+        }
+
+
+        LatLng centerPos = computeCentroid(allMarkerPositions);
+
+        progressDialog.dismiss();
+
+        CameraUpdate center=CameraUpdateFactory.newLatLng(centerPos);
+        CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
+        mMap.moveCamera(center);
+        mMap.animateCamera(zoom);
+
+
+    }
+
+    public boolean contains( String haystack, String needle ) {
+        haystack = haystack == null ? "" : haystack;
+        needle = needle == null ? "" : needle;
+
+        // Works, but is not the best.
+        //return haystack.toLowerCase().indexOf( needle.toLowerCase() ) > -1
+
+        return haystack.toLowerCase().contains( needle.toLowerCase() );
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+
+
+        for(int i=0;i<pSearchMarkers.size();i++){
+            if(marker.equals(pSearchMarkers.get(i))){
+                Intent t = new Intent(MainActivity.this, DetailPriceActivity.class);
+                t.putExtra("key", pkeys.get(i));
+                t.putExtra("price", price.get(i));
+                MainActivity.this.startActivity(t);
+                return true;
+            }
+        }
+
+
+        for(int i=0;i<sSearchMarkers.size();i++){
+            if(marker.equals(sSearchMarkers.get(i))){
+                Intent t = new Intent(MainActivity.this, DetailServiceActivity.class);
+                t.putExtra("key", skeys.get(i));
+                t.putExtra("service", service.get(i));
+                MainActivity.this.startActivity(t);
+                return true;
+            }
+        }
+
+
+        for(int i=0;i<fSearchMarkers.size();i++){
+            if(marker.equals(fSearchMarkers.get(i))){
+                Intent t = new Intent(MainActivity.this, DetailFuelActivity.class);
+                t.putExtra("key", fkeys.get(i));
+                t.putExtra("fuel", fuel.get(i));
+                MainActivity.this.startActivity(t);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private LatLng computeCentroid(List<LatLng> points) {
+        double latitude = 0;
+        double longitude = 0;
+        int n = points.size();
+
+        for (LatLng point : points) {
+            latitude += point.latitude;
+            longitude += point.longitude;
+        }
+
+        return new LatLng(latitude/n, longitude/n);
     }
 }

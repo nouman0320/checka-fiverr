@@ -9,7 +9,7 @@
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-    android:layout_height="match_parent"
+        android:layout_height="match_parent"
         tools:context=".MainActivity"
     >
 
@@ -43,7 +43,10 @@
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:descendantFocusability="beforeDescendants"
+                android:focusableInTouchMode="true" >
+                >
 
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/cl_price"
@@ -220,6 +223,7 @@
                     android:layout_marginRight="8dp"
                     android:background="@drawable/layout_radius_4"
                     android:ems="10"
+                    android:imeOptions="actionSearch"
                     android:hint="What are you looking for?"
                     android:inputType="textPersonName"
                     android:paddingLeft="40dp"

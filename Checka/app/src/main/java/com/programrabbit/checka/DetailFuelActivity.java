@@ -32,6 +32,7 @@ import java.util.Date;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+
 public class DetailFuelActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -164,6 +165,7 @@ public class DetailFuelActivity extends AppCompatActivity implements OnMapReadyC
            public void onClick(View v) {
                if(fuel.getAvailabe() != sb_availability.isChecked()){
                    updateAvailability(sb_availability.isChecked());
+                   finish();
                }
            }
        });

@@ -46,47 +46,44 @@
                 android:id="@+id/tvLastUpdated"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginLeft="20dp"
                 android:layout_marginTop="4dp"
                 android:text="Last updated"
                 android:textSize="10sp"
-                card_view:layout_constraintStart_toEndOf="@+id/tvName"
-                card_view:layout_constraintTop_toTopOf="parent" />
+                card_view:layout_constraintStart_toStartOf="@+id/tvAddress"
+                card_view:layout_constraintTop_toBottomOf="@+id/tvAddress" />
 
             <TextView
                 android:id="@+id/textView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="40dp"
-                android:layout_marginRight="40dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginLeft="48dp"
+                android:layout_marginTop="28dp"
                 android:text="Price"
                 android:textSize="10sp"
-                card_view:layout_constraintEnd_toStartOf="@+id/iv_map"
-                card_view:layout_constraintTop_toTopOf="parent" />
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toBottomOf="@+id/tvAddress" />
 
             <TextView
                 android:id="@+id/tv_price"
                 android:layout_width="126dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="40dp"
-                android:layout_marginRight="40dp"
-                android:gravity="right"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
                 android:text="$ 2000"
                 android:textColor="@color/quantum_googgreen800"
                 android:textSize="24sp"
-                card_view:layout_constraintEnd_toStartOf="@+id/iv_map"
-                card_view:layout_constraintTop_toTopOf="parent" />
+                card_view:layout_constraintEnd_toEndOf="@+id/textView8"
+                card_view:layout_constraintStart_toStartOf="@+id/textView8"
+                card_view:layout_constraintTop_toBottomOf="@+id/textView8" />
 
             <ImageView
                 android:id="@+id/iv_map"
                 android:layout_width="38dp"
                 android:layout_height="34dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginTop="84dp"
+                android:layout_marginEnd="36dp"
+                android:layout_marginRight="36dp"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintTop_toTopOf="parent"
                 card_view:srcCompat="@drawable/ic_map"
@@ -94,26 +91,27 @@
 
             <TextView
                 android:id="@+id/tvVotes"
-                android:layout_width="108dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginRight="12dp"
-                android:gravity="right"
+                android:layout_width="94dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:gravity="center"
                 android:text="Votes +1"
                 android:textSize="10sp"
-                card_view:layout_constraintEnd_toStartOf="@+id/iv_vote"
-                card_view:layout_constraintTop_toBottomOf="@+id/iv_map" />
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toTopOf="@+id/textView8" />
 
             <ImageView
                 android:id="@+id/iv_vote"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                card_view:layout_constraintEnd_toEndOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/iv_map"
+                android:layout_marginTop="8dp"
+                card_view:layout_constraintEnd_toEndOf="@+id/tvVotes"
+                card_view:layout_constraintStart_toStartOf="@+id/tvVotes"
+                card_view:layout_constraintTop_toBottomOf="@+id/tvVotes"
                 card_view:srcCompat="@drawable/ic_testing" />
         </android.support.constraint.ConstraintLayout>
 
