@@ -16,6 +16,8 @@ public class Service implements Serializable {
     String uid_updated;
     int voteCount;
 
+    ArrayList<String> comments = new ArrayList<>();
+
     ArrayList<String> positiveVoteUsers = new ArrayList<>();
     ArrayList<String> negativeVoteUsers = new ArrayList<>();
 
@@ -34,6 +36,7 @@ public class Service implements Serializable {
 
         positiveVoteUsers = new ArrayList<>();
         negativeVoteUsers = new ArrayList<>();
+        comments = new ArrayList<>();
     }
 
     public String getUid_updated() {
@@ -50,6 +53,14 @@ public class Service implements Serializable {
 
     public void setPositiveVoteUsers(ArrayList<String> positiveVoteUsers) {
         this.positiveVoteUsers = positiveVoteUsers;
+    }
+
+    public ArrayList<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<String> comments) {
+        this.comments = comments;
     }
 
     public ArrayList<String> getNegativeVoteUsers() {

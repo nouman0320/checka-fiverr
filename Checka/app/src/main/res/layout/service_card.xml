@@ -16,132 +16,47 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:padding="12dp">
 
             <TextView
                 android:id="@+id/tvName"
-                android:layout_width="344dp"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="22dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="4dp"
-                android:text="Service"
-                android:textSize="14sp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:inputType="textNoSuggestions"
+                android:text="Service"
+                android:clickable="false"
+                android:textSize="14sp"
+                card_view:layout_constraintEnd_toStartOf="@+id/imageViewService"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvAddress"
-                android:layout_width="345dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:inputType="textNoSuggestions"
-                android:text="Address"
-                android:textSize="10sp"
-                card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/tvName" />
-
-            <TextView
-                android:id="@+id/tvServiceType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Service"
-                android:textSize="10sp"
-                android:inputType="textNoSuggestions"
-                card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/tvAddress" />
-
-
-            <TextView
-                android:id="@+id/tvLastUpdated"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:text="Last updated"
-                android:inputType="textNoSuggestions"
-                android:textSize="10sp"
-                card_view:layout_constraintBottom_toBottomOf="@+id/imageViewService"
-                card_view:layout_constraintStart_toEndOf="@+id/imageViewService" />
-
-            <TextView
-                android:id="@+id/textView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="20dp"
-                android:text="Availablility"
-                android:textSize="10sp"
-                android:inputType="textNoSuggestions"
-                card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/tvServiceType" />
 
             <ImageView
                 android:id="@+id/imageViewAvailibility"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginLeft="28dp"
-                android:layout_marginTop="4dp"
-                card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/textView8"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                android:clickable="false"
+                card_view:layout_constraintTop_toTopOf="parent"
                 card_view:srcCompat="@drawable/ic_checked"
                 tools:ignore="VectorDrawableCompat" />
 
             <ImageView
-                android:id="@+id/iv_map"
-                android:layout_width="38dp"
-                android:layout_height="34dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                card_view:layout_constraintBottom_toBottomOf="parent"
-                card_view:layout_constraintEnd_toEndOf="parent"
-                card_view:srcCompat="@drawable/ic_map"
-                tools:ignore="VectorDrawableCompat" />
-
-            <ImageView
                 android:id="@+id/imageViewService"
-                android:layout_width="19dp"
-                android:layout_height="19dp"
-                android:layout_marginStart="4dp"
-                android:layout_marginLeft="4dp"
-                card_view:layout_constraintStart_toEndOf="@+id/tvServiceType"
-                card_view:layout_constraintTop_toTopOf="@+id/tvServiceType"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginRight="12dp"
+                android:clickable="false"
+                card_view:layout_constraintEnd_toStartOf="@+id/imageViewAvailibility"
+                card_view:layout_constraintTop_toTopOf="parent"
                 card_view:srcCompat="@drawable/ic_flash" />
-
-            <TextView
-                android:id="@+id/tvVotes"
-                android:layout_width="108dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:gravity="right"
-                android:text="Votes +1"
-                android:textSize="10sp"
-                android:inputType="textNoSuggestions"
-                card_view:layout_constraintBottom_toTopOf="@+id/iv_vote"
-                card_view:layout_constraintEnd_toEndOf="@+id/iv_vote"
-                card_view:layout_constraintHorizontal_bias="0.904"
-                card_view:layout_constraintStart_toStartOf="@+id/iv_vote" />
-
-            <ImageView
-                android:id="@+id/iv_vote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                card_view:layout_constraintBottom_toBottomOf="parent"
-                card_view:layout_constraintEnd_toEndOf="parent"
-                card_view:layout_constraintStart_toStartOf="parent"
-                card_view:srcCompat="@drawable/ic_testing" />
 
 
         </android.support.constraint.ConstraintLayout>

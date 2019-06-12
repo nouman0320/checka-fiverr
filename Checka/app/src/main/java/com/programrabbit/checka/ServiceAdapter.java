@@ -31,23 +31,17 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
     FirebaseAuth firebaseAuth;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name, address, lastUpdate, service, vote;
-        public ImageView availibility, serviceImageView, iv_vote, iv_map;
+        public TextView name;
+        public ImageView availibility, serviceImageView;
         public CardView cardView;
 
 
         public MyViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.tvName);
-            vote = view.findViewById(R.id.tvVotes);
-            address = view.findViewById(R.id.tvAddress);
-            lastUpdate = view.findViewById(R.id.tvLastUpdated);
             availibility = view.findViewById(R.id.imageViewAvailibility);
-            service = view.findViewById(R.id.tvServiceType);
             serviceImageView = view.findViewById(R.id.imageViewService);
             cardView = view.findViewById(R.id.cardView);
-            iv_vote = view.findViewById(R.id.iv_vote);
-            iv_map = view.findViewById(R.id.iv_map);
         }
     }
 
@@ -75,22 +69,17 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
         final String key = keys.get(position);
 
         holder.name.setText(service.getName());
-        holder.address.setText(service.getAddress());
-        holder.lastUpdate.setText(service.getLastUpdate());
         if(service.getVoteCount()>0) {
-            holder.vote.setText("Votes +" + service.getVoteCount());
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_positive));
         }
         else if(service.getVoteCount() == 0){
-            holder.vote.setText("Votes -");
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_neutral));
         }
         else if(service.getVoteCount() < 0){
-            holder.vote.setText("Votes " + service.getVoteCount());
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_negative));
         }
 
-        holder.iv_map.setOnClickListener(new View.OnClickListener() {
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(mContext, DetailServiceActivity.class);
@@ -100,85 +89,18 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.MyViewHo
             }
         });
 
-        holder.iv_vote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                ArrayList<String> temp = service.getPositiveVoteUsers();
-                temp.addAll(service.negativeVoteUsers);
-                boolean valid = true;
-                for(int i=0;i<temp.size();i++)
-                {
-                    if(uid.equals(temp.get(i))){
-
-                        new MaterialStyledDialog.Builder(mContext)
-                                .setIcon(R.drawable.ic_testing)
-                                .setTitle("Vote")
-                                .setDescription("You have already voted for this service")
-                                .setHeaderColor(R.color.colorPrimary)
-                                .setPositiveText("Close")
-                                .show();
-                        return;
-                    }
-                }
-
-
-                new MaterialStyledDialog.Builder(mContext)
-                        .setIcon(R.drawable.ic_testing)
-                        .setTitle("Vote")
-                        .setDescription("Is this helpful to you?")
-                        .setHeaderColor(R.color.colorPrimary)
-                        .setPositiveText("+1")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-                                Toast.makeText(mContext, "+1", Toast.LENGTH_SHORT).show();
-                                FirebaseDatabase.getInstance().getReference("Service")
-                                        .child(key+"/voteCount").setValue(service.getVoteCount()+1);
-                                service.getPositiveVoteUsers().add(uid);
-                                FirebaseDatabase.getInstance().getReference("Service")
-                                        .child(key+"/positiveVoteUsers").setValue(service.getPositiveVoteUsers());
-
-                            }
-                        })
-                        .setNegativeText("-1")
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Toast.makeText(mContext, "-1", Toast.LENGTH_SHORT).show();
-                                FirebaseDatabase.getInstance().getReference("Service")
-                                        .child(key+"/voteCount").setValue(service.getVoteCount()-1);
-                                service.getPositiveVoteUsers().add(uid);
-                                FirebaseDatabase.getInstance().getReference("Service")
-                                        .child(key+"/negativeVoteUsers").setValue(service.getPositiveVoteUsers());
-                            }
-                        })
-                        .setNeutralText("Cancel")
-                        .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Toast.makeText(mContext, "cancel", Toast.LENGTH_SHORT).show();
-                            }
-                        }).show();
-            }
-        });
 
         if(service.getServiceType() == 0) {
-            holder.service.setText("Electricity");
             holder.serviceImageView.setImageResource(R.drawable.ic_flash);
         }
         else if(service.getServiceType() == 1) {
-            holder.service.setText("Water");
             holder.serviceImageView.setImageResource(R.drawable.ic_drop);
         }
         else if(service.getServiceType() == 2) {
-            holder.service.setText("Sewage");
             holder.serviceImageView.setImageResource(R.drawable.ic_sewage);
         }
         else {
-            holder.service.setText("Unknown");
             holder.serviceImageView.setImageResource(R.drawable.ic_error);
         }
 

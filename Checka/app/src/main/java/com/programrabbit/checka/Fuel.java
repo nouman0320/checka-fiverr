@@ -18,6 +18,7 @@ public class Fuel implements Serializable {
 
     ArrayList<String> positiveVoteUsers = new ArrayList<>();
     ArrayList<String> negativeVoteUsers = new ArrayList<>();
+    ArrayList<String> comments = new ArrayList<>();
 
     public Fuel(String name, String address, double lat, double lng, Boolean availabe, String lu, String uid, int voteCount) {
         this.name = name;
@@ -31,6 +32,7 @@ public class Fuel implements Serializable {
 
         positiveVoteUsers = new ArrayList<>();
         negativeVoteUsers = new ArrayList<>();
+        comments = new ArrayList<>();
     }
 
     public String getUid() {
@@ -47,6 +49,14 @@ public class Fuel implements Serializable {
 
     public void setUid_updated(String uid_updated) {
         this.uid_updated = uid_updated;
+    }
+
+    public ArrayList<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<String> comments) {
+        this.comments = comments;
     }
 
     public int getVoteCount() {

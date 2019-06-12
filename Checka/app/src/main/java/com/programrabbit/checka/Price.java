@@ -14,6 +14,8 @@ public class Price implements Serializable {
     String uid_updated;
     int voteCount;
 
+    ArrayList<String> comments = new ArrayList<>();
+
 
     ArrayList<String> positiveVoteUsers = new ArrayList<>();
     ArrayList<String> negativeVoteUsers = new ArrayList<>();
@@ -30,6 +32,7 @@ public class Price implements Serializable {
 
         positiveVoteUsers = new ArrayList<>();
         negativeVoteUsers = new ArrayList<>();
+        comments = new ArrayList<>();
     }
 
     public Price(){}
@@ -44,6 +47,14 @@ public class Price implements Serializable {
 
     public String getAddress() {
         return address;
+    }
+
+    public ArrayList<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<String> comments) {
+        this.comments = comments;
     }
 
     public void setAddress(String address) {

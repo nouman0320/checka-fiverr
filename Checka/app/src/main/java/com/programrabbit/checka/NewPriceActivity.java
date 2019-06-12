@@ -3,6 +3,8 @@ package com.programrabbit.checka;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -12,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -170,6 +173,19 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(getApplicationContext(), "Updated", Toast.LENGTH_SHORT).show();
+
+                                    NotificationCompat.Builder mBuilder =   new NotificationCompat.Builder(NewPriceActivity.this)
+                                            .setSmallIcon(R.drawable.ic_price_tag) // notification icon
+                                            .setContentTitle("Price Update") // title for notification
+                                            .setContentText("New item price has been added! check out the app") // message for notification
+                                            .setAutoCancel(true); // clear notification after click
+                                    Intent intent = new Intent(NewPriceActivity.this, MainActivity.class);
+                                    @SuppressLint("WrongConstant") PendingIntent pi = PendingIntent.getActivity(NewPriceActivity.this,0,intent, Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    mBuilder.setContentIntent(pi);
+                                    NotificationManager mNotificationManager =
+                                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                    mNotificationManager.notify(0, mBuilder.build());
+
                                     finish();
                                 } else {
                                     Toast.makeText(getApplicationContext(), "Unable to add the price update right now", Toast.LENGTH_SHORT).show();
@@ -244,8 +260,8 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
         });
 
 
-        Toast.makeText(getBaseContext(),"map is ready",
-                Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getBaseContext(),"map is ready",
+          //      Toast.LENGTH_SHORT).show();
     }
 
     @Override

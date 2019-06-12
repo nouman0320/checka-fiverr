@@ -6,6 +6,29 @@
     android:layout_height="match_parent"
     tools:context=".CheckFuelAcitivity">
 
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/cl_admin"
+        android:layout_width="match_parent"
+        android:layout_height="21dp"
+        android:background="@color/quantum_googgreen800"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="Logged in with admin account"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="1dp" />
+    </android.support.constraint.ConstraintLayout>
+
     <ImageView
         android:id="@+id/iv_back"
         android:layout_width="20dp"

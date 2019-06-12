@@ -3,6 +3,9 @@ package com.programrabbit.checka;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,6 +48,8 @@ public class CheckFuelAcitivity extends AppCompatActivity {
 
     private AlertDialog progressDialog;
 
+    ConstraintLayout cl_admin;
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -55,6 +60,13 @@ public class CheckFuelAcitivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_check_fuel_acitivity);
+
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean admin = prefs.getBoolean("admin", false);
+        cl_admin = findViewById(R.id.cl_admin);
+        if(!admin)
+            cl_admin.setVisibility(View.GONE);
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
 

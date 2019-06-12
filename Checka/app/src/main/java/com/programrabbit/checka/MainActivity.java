@@ -149,6 +149,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList<Marker> sSearchMarkers = new ArrayList<>();
     ArrayList<Marker> fSearchMarkers = new ArrayList<>();
 
+    ConstraintLayout cl_admin;
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -159,6 +161,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setNavigationViewListner();
+
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean admin = prefs.getBoolean("admin", false);
+        cl_admin = findViewById(R.id.cl_admin);
+        if(!admin)
+            cl_admin.setVisibility(View.GONE);
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
 
@@ -297,6 +306,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     queryAndDisplayMarkers(et_search.getText().toString());
+                    //Toast.makeText(MainActivity.this, "it's not working as expected.. it will show the markers on map", Toast.LENGTH_LONG).show();
                     return true;
                 }
                 return false;
@@ -336,6 +346,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         googleMap.setMyLocationEnabled(true);
+        googleMap.setOnMarkerClickListener(this);
         googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
 
@@ -377,8 +388,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-        Toast.makeText(getBaseContext(),"map is ready",
-                Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getBaseContext(),"map is ready",
+          //      Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -467,7 +478,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    void queryAndDisplayMarkers(String query){
+    void queryAndDisplayMarkers(final String query){
         progressDialog.show();
 
 
@@ -496,9 +507,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         fSearchMarkers.clear();
 
 
-        priceDatabaseReference.addValueEventListener(new ValueEventListener() {
+        priceDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("Search", "Firebase got search data");
                 ArrayList<Price> s_list = new ArrayList<>();
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
                     s_list.add(ds.getValue(Price.class));
@@ -510,6 +522,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         price = s_list;
                     }
                 }
+
+                for(int i=0;i<price.size();i++){
+                    Price p = price.get(i);
+                    if(contains(p.getName(), query) || contains(p.getAddress(), query))
+                        p_i.add(i);
+                }
             }
 
             @Override
@@ -519,7 +537,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-        fuelDatabaseReference.addValueEventListener(new ValueEventListener() {
+        fuelDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<Fuel> s_list = new ArrayList<>();
@@ -533,6 +551,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         fuel = s_list;
                     }
                 }
+
+                for(int i=0;i<fuel.size();i++){
+                    Fuel f = fuel.get(i);
+                    if(contains(f.getName(), query) || contains(f.getAddress(), query))
+                        f_i.add(i);
+                }
             }
 
             @Override
@@ -542,7 +566,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-        serviceDatabaseReference.addValueEventListener(new ValueEventListener() {
+        serviceDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<Service> s_list = new ArrayList<>();
@@ -556,6 +580,64 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         service = s_list;
                     }
                 }
+
+                for(int i=0;i<service.size();i++){
+                    Service s = service.get(i);
+                    if(contains(s.getName(), query) || contains(s.getAddress(), query))
+                        s_i.add(i);
+                }
+
+
+                Log.d("Search", p_i.size() +" "+s_i.size() +" "+ f_i.size());
+
+                ArrayList<LatLng> allMarkerPositions = new ArrayList<>();
+
+                for(int i=0;i<p_i.size();i++){
+                    LatLng latLng = new LatLng(price.get(p_i.get(i)).lat,price.get(p_i.get(i)).lng);
+                    allMarkerPositions.add(latLng);
+                    Marker temp = mMap.addMarker(new MarkerOptions()
+                            .position(latLng));
+                    temp.setIcon(bitmapDescriptorFromVector(MainActivity.this, R.drawable.ic_price_tag));
+                    pSearchMarkers.add(temp);
+
+                }
+
+
+                for(int i=0;i<s_i.size();i++){
+                    LatLng latLng = new LatLng(service.get(s_i.get(i)).lat,service.get(s_i.get(i)).lng);
+                    allMarkerPositions.add(latLng);
+                    Marker temp = mMap.addMarker(new MarkerOptions()
+                            .position(latLng));
+                    temp.setIcon(bitmapDescriptorFromVector(MainActivity.this, R.drawable.ic_service));
+                    sSearchMarkers.add(temp);
+                }
+
+
+                for(int i=0;i<f_i.size();i++){
+                    LatLng latLng = new LatLng(fuel.get(f_i.get(i)).lat,fuel.get(f_i.get(i)).lng);
+                    allMarkerPositions.add(latLng);
+                    Marker temp = mMap.addMarker(new MarkerOptions()
+                            .position(latLng));
+                    temp.setIcon(bitmapDescriptorFromVector(MainActivity.this, R.drawable.ic_fuel));
+                    fSearchMarkers.add(temp);
+                }
+
+                LatLng centerPos;
+
+                if(allMarkerPositions.size()>0){
+                    centerPos = computeCentroid(allMarkerPositions);
+                }
+                else{
+                    centerPos = new LatLng(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude);
+                }
+
+
+                progressDialog.dismiss();
+
+                CameraUpdate center=CameraUpdateFactory.newLatLng(centerPos);
+                CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
+                mMap.moveCamera(center);
+                mMap.animateCamera(zoom);
             }
 
             @Override
@@ -564,68 +646,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-
-
-
-
-        for(int i=0;i<price.size();i++){
-            Price p = price.get(i);
-            if(contains(p.getName(), query) || contains(p.getAddress(), query))
-                p_i.add(i);
-        }
-
-        for(int i=0;i<service.size();i++){
-            Service s = service.get(i);
-            if(contains(s.getName(), query) || contains(s.getAddress(), query))
-                s_i.add(i);
-        }
-
-        for(int i=0;i<fuel.size();i++){
-            Fuel f = fuel.get(i);
-            if(contains(f.getName(), query) || contains(f.getAddress(), query))
-                f_i.add(i);
-        }
-
-
-        ArrayList<LatLng> allMarkerPositions = new ArrayList<>();
-
-        for(int i=0;i<p_i.size();i++){
-            LatLng latLng = new LatLng(price.get(p_i.get(i)).lat,price.get(p_i.get(i)).lng);
-            allMarkerPositions.add(latLng);
-            Marker temp = mMap.addMarker(new MarkerOptions()
-                            .position(latLng));
-            temp.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
-
-        }
-
-
-        for(int i=0;i<s_i.size();i++){
-            LatLng latLng = new LatLng(service.get(s_i.get(i)).lat,service.get(s_i.get(i)).lng);
-            allMarkerPositions.add(latLng);
-            Marker temp = mMap.addMarker(new MarkerOptions()
-                    .position(latLng));
-            temp.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
-
-        }
-
-
-        for(int i=0;i<f_i.size();i++){
-            LatLng latLng = new LatLng(fuel.get(f_i.get(i)).lat,fuel.get(f_i.get(i)).lng);
-            allMarkerPositions.add(latLng);
-            Marker temp = mMap.addMarker(new MarkerOptions()
-                    .position(latLng));
-            temp.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_gps_service));
-        }
-
-
-        LatLng centerPos = computeCentroid(allMarkerPositions);
-
-        progressDialog.dismiss();
-
-        CameraUpdate center=CameraUpdateFactory.newLatLng(centerPos);
-        CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
-        mMap.moveCamera(center);
-        mMap.animateCamera(zoom);
 
 
     }
@@ -644,11 +664,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onMarkerClick(final Marker marker) {
 
 
+        //Toast.makeText(getBaseContext(), "onMarkerClicked",Toast.LENGTH_SHORT).show();
+
         for(int i=0;i<pSearchMarkers.size();i++){
             if(marker.equals(pSearchMarkers.get(i))){
                 Intent t = new Intent(MainActivity.this, DetailPriceActivity.class);
-                t.putExtra("key", pkeys.get(i));
-                t.putExtra("price", price.get(i));
+                t.putExtra("key", pkeys.get(p_i.get(i)));
+                t.putExtra("price", price.get(p_i.get(i)));
+                Log.d("Marker", pkeys.get(i));
                 MainActivity.this.startActivity(t);
                 return true;
             }
@@ -658,8 +681,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         for(int i=0;i<sSearchMarkers.size();i++){
             if(marker.equals(sSearchMarkers.get(i))){
                 Intent t = new Intent(MainActivity.this, DetailServiceActivity.class);
-                t.putExtra("key", skeys.get(i));
-                t.putExtra("service", service.get(i));
+                t.putExtra("key", skeys.get(s_i.get(i)));
+                t.putExtra("service", service.get(s_i.get(i)));
+                Log.d("Marker", skeys.get(i));
                 MainActivity.this.startActivity(t);
                 return true;
             }
@@ -669,8 +693,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         for(int i=0;i<fSearchMarkers.size();i++){
             if(marker.equals(fSearchMarkers.get(i))){
                 Intent t = new Intent(MainActivity.this, DetailFuelActivity.class);
-                t.putExtra("key", fkeys.get(i));
-                t.putExtra("fuel", fuel.get(i));
+                t.putExtra("key", fkeys.get(f_i.get(i)));
+                t.putExtra("fuel", fuel.get(f_i.get(i)));
+                Log.d("Marker", fkeys.get(i));
                 MainActivity.this.startActivity(t);
                 return true;
             }

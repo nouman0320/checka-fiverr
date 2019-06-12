@@ -25,11 +25,32 @@
             app:layout_anchor="@+id/map"
             app:layout_anchorGravity="bottom|center" />
 
-    <fragment
+        <fragment
         android:id="@+id/map"
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/cl_admin"
+            android:layout_width="match_parent"
+            android:layout_height="21dp"
+            android:background="@color/quantum_googgreen800">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="Logged in with admin account"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:layout_editor_absoluteY="1dp" />
+        </android.support.constraint.ConstraintLayout>
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/bottom_sheet"

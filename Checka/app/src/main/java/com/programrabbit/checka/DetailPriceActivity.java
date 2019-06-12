@@ -1,7 +1,14 @@
 package com.programrabbit.checka;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +19,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -53,17 +62,172 @@ public class DetailPriceActivity extends AppCompatActivity implements OnMapReady
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
 
+    FloatingActionButton fab_more;
+    FloatingActionButton fab_up;
+    FloatingActionButton fab_down;
+    FloatingActionButton fab_comment;
+
+    ConstraintLayout cl_admin;
+
+    private BottomSheetBehavior mBottomSheetBehavior;
+
     String key;
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_price);
         getSupportActionBar().hide();
+
+        price = (Price) getIntent().getSerializableExtra("price");
+        key = getIntent().getStringExtra("key");
+
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean admin = prefs.getBoolean("admin", false);
+        cl_admin = findViewById(R.id.cl_admin);
+        if(!admin)
+            cl_admin.setVisibility(View.GONE);
+
+
+        View bottomSheet = findViewById(R.id.bottom_sheet);
+
+        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+
+        fab_more = findViewById(R.id.fab_more);
+        fab_up = findViewById(R.id.fab_thumbs_up);
+        fab_down = findViewById(R.id.fab_thumbs_down);
+        fab_comment = findViewById(R.id.fab_comments);
+
+        fab_more.setVisibility(View.GONE);
+
+        fab_more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        });
+
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        final ArrayList<String> positive = price.getPositiveVoteUsers();
+        final ArrayList<String> negative = price.getNegativeVoteUsers();
+
+
+
+        fab_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int user_vote_state = 0;
+                for(int i=0;i<positive.size();i++)
+                {
+                    if(uid.equals(positive.get(i))){
+                        user_vote_state = 1;
+                        break;
+                    }
+                }
+
+                if(user_vote_state != 0){
+                    new MaterialStyledDialog.Builder(DetailPriceActivity.this)
+                            .setIcon(R.drawable.ic_testing)
+                            .setTitle("Vote")
+                            .setDescription("You have already voted for this price update")
+                            .setHeaderColor(R.color.colorPrimary)
+                            .setPositiveText("Close")
+                            .show();
+                    return;
+                }
+
+                final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                Toast.makeText(DetailPriceActivity.this, "+1", Toast.LENGTH_SHORT).show();
+                FirebaseDatabase.getInstance().getReference("Price")
+                        .child(key+"/voteCount").setValue(price.getVoteCount()+1);
+                price.getPositiveVoteUsers().add(uid);
+                FirebaseDatabase.getInstance().getReference("Price")
+                        .child(key+"/positiveVoteUsers").setValue(price.getPositiveVoteUsers());
+
+                fab_up.setBackgroundColor(DetailPriceActivity.this.getResources().getColor(R.color.quantum_googgreen));
+                fab_down.setBackgroundColor(DetailPriceActivity.this.getResources().getColor(R.color.card_neutral));
+            }
+        });
+
+        fab_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int user_vote_state = 0;
+                for(int i=0;i<negative.size();i++)
+                {
+                    if(uid.equals(negative.get(i))){
+                        user_vote_state = -1;
+                        break;
+                    }
+                }
+
+                if(user_vote_state != 0){
+                    new MaterialStyledDialog.Builder(DetailPriceActivity.this)
+                            .setIcon(R.drawable.ic_testing)
+                            .setTitle("Vote")
+                            .setDescription("You have already voted for this price update")
+                            .setHeaderColor(R.color.colorPrimary)
+                            .setPositiveText("Close")
+                            .show();
+                    return;
+                }
+
+                final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                Toast.makeText(DetailPriceActivity.this, "-1", Toast.LENGTH_SHORT).show();
+                FirebaseDatabase.getInstance().getReference("Price")
+                        .child(key+"/voteCount").setValue(price.getVoteCount()-1);
+                price.getPositiveVoteUsers().add(uid);
+                FirebaseDatabase.getInstance().getReference("Price")
+                        .child(key+"/negativeVoteUsers").setValue(price.getPositiveVoteUsers());
+
+                fab_down.setBackgroundColor(DetailPriceActivity.this.getResources().getColor(R.color.quantum_googred));
+                fab_up.setBackgroundColor(DetailPriceActivity.this.getResources().getColor(R.color.card_neutral));
+
+            }
+        });
+
+        fab_comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(DetailPriceActivity.this, CommentsPriceActivity.class);
+                i.putExtra("key", key);
+                i.putExtra("price", price);
+                DetailPriceActivity.this.startActivity(i);
+            }
+        });
+
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+                if (newState == BottomSheetBehavior.STATE_HIDDEN){
+                    fab_more.setVisibility(View.VISIBLE);
+                }
+                else if(newState == BottomSheetBehavior.STATE_COLLAPSED){
+
+                }
+                else if(newState == BottomSheetBehavior.STATE_HALF_EXPANDED){
+
+                }
+                else {
+                    fab_more.setVisibility(View.GONE);
+
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+
+            }
+        });
+
 
 
         iv_back = findViewById(R.id.iv_back);
@@ -80,9 +244,12 @@ public class DetailPriceActivity extends AppCompatActivity implements OnMapReady
         tv_updated_by.setVisibility(View.GONE);
         tv_update_by_heading.setVisibility(View.GONE);
 
+        if(!admin){
+            btn_remove.setVisibility(View.GONE);
+        }
 
-        price = (Price) getIntent().getSerializableExtra("price");
-        key = getIntent().getStringExtra("key");
+
+
 
         tv_name.setText(price.getName());
 
@@ -152,7 +319,7 @@ public class DetailPriceActivity extends AppCompatActivity implements OnMapReady
                 DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
                 rootRef.child("Price").child(key).removeValue();
                 finish();
-                Toast.makeText(getBaseContext(), "Removed", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getBaseContext(), "Removed", Toast.LENGTH_LONG).show();
             }
         });
 

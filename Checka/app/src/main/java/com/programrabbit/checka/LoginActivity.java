@@ -19,8 +19,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if(task.isSuccessful()){
-                                    Toast.makeText(getApplicationContext(), "logged in", Toast.LENGTH_LONG).show();
+                                    //Toast.makeText(getApplicationContext(), "logged in", Toast.LENGTH_LONG).show();
 
                                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
                                     SharedPreferences.Editor editor = prefs.edit();
@@ -108,9 +111,41 @@ public class LoginActivity extends AppCompatActivity {
                                     editor.putString("password", et_password.getText().toString());
                                     editor.apply();
 
-                                    Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                                    LoginActivity.this.startActivity(mainIntent);
-                                    LoginActivity.this.finish();
+
+                                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                    FirebaseDatabase.getInstance().getReference("User/"+uid+"/admin")
+                                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                boolean temp = false;
+                                                temp = dataSnapshot.getValue(Boolean.class);
+
+
+                                                /*
+                                                if(temp){
+                                                    Toast.makeText(getApplicationContext(), "Admin yes",Toast.LENGTH_SHORT).show();
+                                                }
+                                                else
+                                                    Toast.makeText(getApplicationContext(), "Admin no",Toast.LENGTH_SHORT).show();
+                                                */
+
+                                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putBoolean("admin",temp);
+                                                editor.apply();
+
+                                                Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                                LoginActivity.this.startActivity(mainIntent);
+                                                LoginActivity.this.finish();
+                                            }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+
+
 
                                 } else {
                                     Toast.makeText(getApplicationContext(), task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();

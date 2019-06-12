@@ -20,8 +20,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -139,9 +142,33 @@ public class SplashActivity extends AppCompatActivity {
                                 editor.putString("password", password);
                                 editor.apply();
 
-                                Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-                                SplashActivity.this.startActivity(mainIntent);
-                                SplashActivity.this.finish();
+
+                                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                FirebaseDatabase.getInstance().getReference("User/"+uid+"/admin")
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                boolean temp = false;
+                                                temp = dataSnapshot.getValue(Boolean.class);
+
+                                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putBoolean("admin",temp);
+                                                editor.apply();
+
+                                                Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+                                                SplashActivity.this.startActivity(mainIntent);
+                                                SplashActivity.this.finish();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
+
+
 
                             } else {
                                 Toast.makeText(getApplicationContext(), task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();

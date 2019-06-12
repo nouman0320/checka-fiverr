@@ -2,15 +2,26 @@ package com.programrabbit.checka;
 
 public class User {
     String name, address, email, mobile_number;
+    boolean admin=false;
 
     public User(String name, String address, String email, String mobile_number) {
         this.name = name;
         this.address = address;
         this.email = email;
         this.mobile_number = mobile_number;
+        admin = false;
     }
 
     public User() { }
+
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
 
     public String getName() {
         return name;

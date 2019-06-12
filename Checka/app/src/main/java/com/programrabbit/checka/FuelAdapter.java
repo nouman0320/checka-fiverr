@@ -33,19 +33,14 @@ public class FuelAdapter extends RecyclerView.Adapter<FuelAdapter.MyViewHolder> 
     FirebaseAuth firebaseAuth;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name, address, lastUpdate, tv_vote;
-        public ImageView availibility, iv_vote, iv_map;
+        public TextView name;
+        public ImageView availibility;
         public CardView cardView;
 
         public MyViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.tvName);
-            address = view.findViewById(R.id.tvAddress);
-            lastUpdate = view.findViewById(R.id.tvLastUpdated);
             availibility = view.findViewById(R.id.imageViewAvailibility);
-            iv_vote = view.findViewById(R.id.iv_vote);
-            iv_map = view.findViewById(R.id.iv_map);
-            tv_vote = view.findViewById(R.id.tvVotes);
             cardView = view.findViewById(R.id.cardView);
         }
     }
@@ -74,27 +69,22 @@ public class FuelAdapter extends RecyclerView.Adapter<FuelAdapter.MyViewHolder> 
         final String key = keys.get(position);
 
         holder.name.setText(fuel.getName());
-        holder.address.setText(fuel.getAddress());
-        holder.lastUpdate.setText(fuel.getLastUpdate());
 
         if(fuel.getAvailabe())
             holder.availibility.setImageResource(R.drawable.ic_checked);
         else holder.availibility.setImageResource(R.drawable.ic_error);
 
         if(fuel.getVoteCount()>0) {
-            holder.tv_vote.setText("Votes +" + fuel.getVoteCount());
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_positive));
         }
         else if(fuel.getVoteCount() == 0){
-            holder.tv_vote.setText("Votes -");
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_neutral));
         }
         else if(fuel.getVoteCount() < 0){
-            holder.tv_vote.setText("Votes " + fuel.getVoteCount());
             holder.cardView.setBackgroundColor(mContext.getResources().getColor(R.color.card_negative));
         }
 
-        holder.iv_map.setOnClickListener(new View.OnClickListener() {
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(mContext, DetailFuelActivity.class);
@@ -103,72 +93,6 @@ public class FuelAdapter extends RecyclerView.Adapter<FuelAdapter.MyViewHolder> 
                 mContext.startActivity(i);
             }
         });
-
-        holder.iv_vote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                ArrayList<String> temp = fuel.getPositiveVoteUsers();
-                temp.addAll(fuel.negativeVoteUsers);
-                boolean valid = true;
-                for(int i=0;i<temp.size();i++)
-                {
-                    if(uid.equals(temp.get(i))){
-
-                        new MaterialStyledDialog.Builder(mContext)
-                                .setIcon(R.drawable.ic_testing)
-                                .setTitle("Vote")
-                                .setDescription("You have already voted for this fuel update")
-                                .setHeaderColor(R.color.colorPrimary)
-                                .setPositiveText("Close")
-                                .show();
-                        return;
-                    }
-                }
-
-
-                new MaterialStyledDialog.Builder(mContext)
-                        .setIcon(R.drawable.ic_testing)
-                        .setTitle("Vote")
-                        .setDescription("Is this helpful to you?")
-                        .setHeaderColor(R.color.colorPrimary)
-                        .setPositiveText("+1")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-                                Toast.makeText(mContext, "+1", Toast.LENGTH_SHORT).show();
-                                FirebaseDatabase.getInstance().getReference("Fuel")
-                                        .child(key+"/voteCount").setValue(fuel.getVoteCount()+1);
-                                fuel.getPositiveVoteUsers().add(uid);
-                                FirebaseDatabase.getInstance().getReference("Fuel")
-                                        .child(key+"/positiveVoteUsers").setValue(fuel.getPositiveVoteUsers());
-
-                            }
-                        })
-                        .setNegativeText("-1")
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Toast.makeText(mContext, "-1", Toast.LENGTH_SHORT).show();
-                                FirebaseDatabase.getInstance().getReference("Fuel")
-                                        .child(key+"/voteCount").setValue(fuel.getVoteCount()-1);
-                                fuel.getPositiveVoteUsers().add(uid);
-                                FirebaseDatabase.getInstance().getReference("Fuel")
-                                        .child(key+"/negativeVoteUsers").setValue(fuel.getPositiveVoteUsers());
-                            }
-                        })
-                        .setNeutralText("Cancel")
-                        .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Toast.makeText(mContext, "cancel", Toast.LENGTH_SHORT).show();
-                            }
-                        }).show();
-            }
-        });
-
 
     }
 
