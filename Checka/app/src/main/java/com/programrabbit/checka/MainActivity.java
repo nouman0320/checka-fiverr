@@ -169,6 +169,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean admin = prefs.getBoolean("admin", false);
         Boolean new_user = prefs.getBoolean("new", false);
+
+        if(new_user){
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.remove("new");
+            editor.commit();
+        }
+
+
+
         cl_admin = findViewById(R.id.cl_admin);
         if(!admin)
             cl_admin.setVisibility(View.GONE);

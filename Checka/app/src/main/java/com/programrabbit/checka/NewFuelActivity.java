@@ -18,7 +18,9 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -26,6 +28,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -44,12 +47,18 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import dmax.dialog.SpotsDialog;
@@ -63,12 +72,20 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
     private Location mLastKnownLocation;
     private LocationCallback locationCallback;
 
+    AutocompleteSupportFragment autocompleteFragment;
+
+    String address = "";
+
     ImageView iv_back;
     FloatingActionButton fab;
 
     EditText et_name;
-    EditText et_address;
+    //AutoCompleteTextView actv_address;
+
+
     Switch sb_availability;
+
+    String apiKey = "AIzaSyDzx-vWPnVEyrYv93hjxmL4S7e1pUy8-JU";
 
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
@@ -86,6 +103,33 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_new_fuel);
         getSupportActionBar().hide();
 
+        Places.initialize(getApplicationContext(), apiKey);
+        PlacesClient placesClient = Places.createClient(this);
+
+        // Initialize the AutocompleteSupportFragment.
+        autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+// Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
+
+// Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                // TODO: Get info about the selected place.
+                Log.i("Place", "Address: " + place.getAddress() + ", " + place.getId());
+                address=place.getAddress();
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                // TODO: Handle the error.
+                Log.i("Place", "An error occurred: " + status);
+            }
+        }
+    );
+
         progressDialog = new SpotsDialog(this, R.style.Custom);
 
 
@@ -93,7 +137,7 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
         fab= findViewById(R.id.fab);
 
         et_name = findViewById(R.id.et_location_name);
-        et_address = findViewById(R.id.et_address);
+        //actv_address = findViewById(R.id.et_address);
         sb_availability = findViewById(R.id.sb_availability);
 
 
@@ -127,7 +171,7 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
             public void onClick(View v) {
                 //finish();
                 String name = et_name.getText().toString();
-                String address = et_address.getText().toString();
+                //String address = actv_address.getText().toString();
 
                 int vCount = 0;
 
@@ -136,8 +180,9 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
                     vCount++;
                 }
 
+
                 if(TextUtils.isEmpty(address)){
-                    et_address.setError("Address can not be empty");
+                    Toast.makeText(getBaseContext(), "Address can not be empty", Toast.LENGTH_SHORT).show();
                     vCount++;
                 }
 
