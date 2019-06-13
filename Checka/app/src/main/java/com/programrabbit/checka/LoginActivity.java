@@ -117,7 +117,7 @@ public class LoginActivity extends AppCompatActivity {
                                             .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                                boolean temp = false;
+                                                Boolean temp = false;
                                                 temp = dataSnapshot.getValue(Boolean.class);
 
 
@@ -131,7 +131,10 @@ public class LoginActivity extends AppCompatActivity {
 
                                                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
                                                 SharedPreferences.Editor editor = prefs.edit();
-                                                editor.putBoolean("admin",temp);
+                                                if(temp==null)
+                                                    editor.putBoolean("admin",false);
+                                                else
+                                                    editor.putBoolean("admin",temp);
                                                 editor.apply();
 
                                                 Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
@@ -159,7 +162,7 @@ public class LoginActivity extends AppCompatActivity {
         tv_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mainIntent = new Intent(LoginActivity.this, SignupActivity.class);
+                Intent mainIntent = new Intent(LoginActivity.this, PhoneVerificationActivity.class);
                 LoginActivity.this.startActivity(mainIntent);
                 LoginActivity.this.finish();
             }

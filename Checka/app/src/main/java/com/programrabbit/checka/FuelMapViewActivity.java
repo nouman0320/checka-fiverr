@@ -3,30 +3,28 @@ package com.programrabbit.checka;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -42,42 +40,63 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class NewServiceActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class FuelMapViewActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    private View mapView;
+
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private Location mLastKnownLocation;
     private LocationCallback locationCallback;
 
-    ImageView iv_back;
-    FloatingActionButton fab;
 
-    EditText et_location_name, et_address;
+    ImageView iv_back;
+
+    FloatingActionButton fab_list;
+    FloatingActionButton fab_new;
+
+    ArrayList<Fuel> myFuelData = new ArrayList<>();
+
+    ArrayList<String> keys = new ArrayList<>();
+
+    ArrayList<Marker> markers = new ArrayList<>();
 
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
 
     private AlertDialog progressDialog;
+
+    ConstraintLayout cl_admin;
+
+
+
+    private View mapView;
+
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -87,18 +106,24 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_service);
+        setContentView(R.layout.activity_fuel_map_view);
+        getSupportActionBar().hide();
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
 
-        final int[] problemLevel = new int[1];
-        final int[] serviceType = new int[1];
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean admin = prefs.getBoolean("admin", false);
+        cl_admin = findViewById(R.id.cl_admin);
+        if(!admin)
+            cl_admin.setVisibility(View.GONE);
 
-        et_location_name = findViewById(R.id.et_location_name);
-        et_address = findViewById(R.id.et_address);
+
+        fab_list = findViewById(R.id.fab_list_view);
+
+        fab_new = findViewById(R.id.fab_new);
 
         iv_back = findViewById(R.id.iv_back);
-        fab= findViewById(R.id.fab);
+
 
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,60 +132,22 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
             }
         });
 
-
-        Spinner serviceSpinner = (Spinner) findViewById(R.id.spinnerCategory);
-
-        ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(NewServiceActivity.this,
-                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.services));
-        myAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        serviceSpinner.setAdapter(myAdapter);
-
-
-
-
-        final Spinner problemSpinner = (Spinner) findViewById(R.id.spinnerProblem);
-
-        final ArrayAdapter<String> myAdapter2 = new ArrayAdapter<String>(NewServiceActivity.this,
-                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.problem_level));
-
-        final ArrayAdapter<String> myAdapter3 = new ArrayAdapter<String>(NewServiceActivity.this,
-                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.problem_level_electricity));
-
-        myAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        problemSpinner.setAdapter(myAdapter3);
-
-        problemSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        fab_new.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                problemLevel[0] = i;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+            public void onClick(View v) {
+                Intent i = new Intent(FuelMapViewActivity.this, NewFuelActivity.class);
+                FuelMapViewActivity.this.startActivity(i);
             }
         });
 
 
-        serviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        fab_list.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                serviceType[0] = i;
-                if(i==1 || i==2){
-                    problemSpinner.setAdapter(myAdapter2);
-
-                }
-                else problemSpinner.setAdapter(myAdapter3);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+            public void onClick(View v) {
+                Intent i = new Intent(FuelMapViewActivity.this, CheckFuelAcitivity.class);
+                FuelMapViewActivity.this.startActivity(i);
             }
         });
-
-
-        getSupportActionBar().hide();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -175,84 +162,10 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
 
 
         mapFragment.getMapAsync(this);
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(NewServiceActivity.this);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(FuelMapViewActivity.this);
 
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String name = et_location_name.getText().toString();
-                String address = et_address.getText().toString();
-
-
-                int vCount = 0;
-
-                if(TextUtils.isEmpty(name)){
-                    et_location_name.setError("Location name can not be empty");
-                    vCount++;
-                }
-
-                if(TextUtils.isEmpty(address)){
-                    et_address.setError("Address can not be empty");
-                    vCount++;
-                }
-
-                if(vCount>0)
-                    return;
-
-                progressDialog.show();
-
-                int t_problemLevel = problemLevel[0];
-                int t_serviceType = serviceType[0];
-
-                if(t_serviceType==0 && t_problemLevel==1)
-                    t_problemLevel=2;
-
-                LatLng latLng = mMap.getCameraPosition().target;
-
-                DateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy  HH:mm");
-                Date datex = new Date();
-                String date = dateFormat.format(datex);
-
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                String child_uid = databaseReference.push().getKey();
-
-                Service service = new Service(name, address, t_problemLevel, t_serviceType,latLng,date,uid,0);
-                FirebaseDatabase.getInstance().getReference("Service")
-                        .child(child_uid)
-                        .setValue(service)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Updated", Toast.LENGTH_SHORT).show();
-
-                                    NotificationCompat.Builder mBuilder =   new NotificationCompat.Builder(NewServiceActivity.this)
-                                            .setSmallIcon(R.drawable.ic_service) // notification icon
-                                            .setContentTitle("Service Update") // title for notification
-                                            .setContentText("New service update has been added! check out the app") // message for notification
-                                            .setAutoCancel(true); // clear notification after click
-                                    Intent intent = new Intent(NewServiceActivity.this, MainActivity.class);
-                                    @SuppressLint("WrongConstant") PendingIntent pi = PendingIntent.getActivity(NewServiceActivity.this,0,intent, Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    mBuilder.setContentIntent(pi);
-                                    NotificationManager mNotificationManager =
-                                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                                    mNotificationManager.notify(0, mBuilder.build());
-
-                                    finish();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Unable to add the service right now", Toast.LENGTH_SHORT).show();
-                                }
-                                progressDialog.dismiss();
-                            }
-                        });
-
-            }
-        });
-
-        databaseReference = FirebaseDatabase.getInstance().getReference("Service");
+        databaseReference = FirebaseDatabase.getInstance().getReference("Fuel");
         firebaseAuth = FirebaseAuth.getInstance();
     }
 
@@ -260,9 +173,10 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        /*
         googleMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                        this, R.raw.style_night_json));
+                        this, R.raw.style_json));*/
 
         googleMap.getUiSettings().setMapToolbarEnabled(false);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -278,6 +192,7 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
             return;
         }
         googleMap.setMyLocationEnabled(true);
+        googleMap.setOnMarkerClickListener(this);
         googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
 
@@ -290,20 +205,20 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
         SettingsClient settingsClient = LocationServices.getSettingsClient(getBaseContext());
         Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
 
-        task.addOnSuccessListener(NewServiceActivity.this, new OnSuccessListener<LocationSettingsResponse>() {
+        task.addOnSuccessListener(FuelMapViewActivity.this, new OnSuccessListener<LocationSettingsResponse>() {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 getDeviceLocation();
             }
         });
 
-        task.addOnFailureListener(NewServiceActivity.this, new OnFailureListener() {
+        task.addOnFailureListener(FuelMapViewActivity.this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 if(e instanceof ResolvableApiException){
                     ResolvableApiException resolvable = (ResolvableApiException) e;
                     try {
-                        resolvable.startResolutionForResult(NewServiceActivity.this, 51);
+                        resolvable.startResolutionForResult(FuelMapViewActivity.this, 51);
                     } catch (IntentSender.SendIntentException e1) {
                         e1.printStackTrace();
                     }
@@ -312,18 +227,61 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
         });
 
 
-        //Toast.makeText(getBaseContext(),"map is ready",
-          //      Toast.LENGTH_SHORT).show();
+        progressDialog.show();
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<Fuel> s_list = new ArrayList<>();
+                keys = new ArrayList<>();
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    s_list.add(ds.getValue(Fuel.class));
+                    keys.add(ds.getKey());
+                    if(ds.getValue(Fuel.class).name == null){
+                        databaseReference.child(ds.getKey()).removeValue();
+                        Intent i = new Intent(FuelMapViewActivity.this, FuelMapViewActivity.class);
+                        startActivity(i);
+                        finish();
+                    }
+                    else{
+                        Log.w("Firebase", ds.getValue(Fuel.class).name);
+                        myFuelData = s_list;
+
+                    }
+                }
+
+                updateMarkers();
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("Firebase", "onCancelled", databaseError.toException());
+                progressDialog.dismiss();
+            }
+        });
+
+
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == 51){
-            if(resultCode == RESULT_OK){
-                getDeviceLocation();
-            }
+    void updateMarkers(){
+
+        for(int i=0;i<markers.size();i++){
+            markers.get(i).remove();
+        }
+
+        for(int i=0;i<myFuelData.size();i++){
+            LatLng latLng = new LatLng(myFuelData.get(i).lat, myFuelData.get(i).lng);
+            Marker temp = mMap.addMarker(new MarkerOptions()
+                    .position(latLng));
+
+            if(myFuelData.get(i).getAvailabe())
+                temp.setIcon(bitmapDescriptorFromVector(FuelMapViewActivity.this, R.drawable.ic_fuel_available));
+            else
+                temp.setIcon(bitmapDescriptorFromVector(FuelMapViewActivity.this, R.drawable.ic_fuel_not_available));
+            markers.add(temp);
+
+            Log.d("Marker", "marker added");
         }
     }
 
@@ -363,5 +321,34 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
                         }
                     }
                 });
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+
+        Log.d("Marker", Integer.toString(markers.size()));
+
+        for(int i=0;i<markers.size();i++){
+            String key = keys.get(i);
+            Fuel fuel = myFuelData.get(i);
+            if(markers.get(i).equals(marker)){
+                Intent in = new Intent(this, DetailFuelActivity.class);
+                in.putExtra("key", key);
+                in.putExtra("fuel", fuel);
+                startActivity(in);
+            }
+        }
+
+        return false;
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }

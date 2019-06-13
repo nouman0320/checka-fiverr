@@ -148,12 +148,17 @@ public class SplashActivity extends AppCompatActivity {
                                         .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                                boolean temp = false;
+                                                Boolean temp = false;
                                                 temp = dataSnapshot.getValue(Boolean.class);
 
                                                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
                                                 SharedPreferences.Editor editor = prefs.edit();
-                                                editor.putBoolean("admin",temp);
+
+                                                if(temp==null)
+                                                    editor.putBoolean("admin",false);
+                                                else
+                                                    editor.putBoolean("admin",temp);
+
                                                 editor.apply();
 
                                                 Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);

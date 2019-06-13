@@ -39,7 +39,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class SignupActivity extends AppCompatActivity {
 
     TextView tv_login;
-    EditText et_name, et_address, et_email, et_number, et_password, et_re_password;
+    EditText et_name, et_address, et_email, et_password, et_re_password;
     Button btn_signup;
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
@@ -60,13 +60,15 @@ public class SignupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signup);
         getSupportActionBar().hide();
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final String number = prefs.getString("number", "");
+
         progressDialog = new SpotsDialog(this, R.style.Custom);
 
         tv_login = findViewById(R.id.link_login);
         et_name = findViewById(R.id.input_name);
         et_address = findViewById(R.id.input_address);
         et_email = findViewById(R.id.input_email);
-        et_number = findViewById(R.id.input_mobile);
         et_password = findViewById(R.id.input_password);
         et_re_password = findViewById(R.id.input_reEnterPassword);
         btn_signup = findViewById(R.id.btn_signup);
@@ -92,7 +94,7 @@ public class SignupActivity extends AppCompatActivity {
                 final User user = new User(et_name.getText().toString()
                         , et_address.getText().toString()
                         , et_email.getText().toString()
-                        , et_number.getText().toString());
+                        , number);
 
 
                 int vCount = 0;
@@ -102,18 +104,12 @@ public class SignupActivity extends AppCompatActivity {
                     vCount++;
                 }
                 if(TextUtils.isEmpty(user.getAddress())){
-                    et_address.setError("Address is required");
-                    vCount++;
+                   et_address.setText("");
                 }
                 if(TextUtils.isEmpty(user.getEmail())){
                     et_email.setError("Email is required");
                     vCount++;
                 }
-                if(TextUtils.isEmpty(user.getMobile_number())){
-                    et_number.setError("Number is required");
-                    vCount++;
-                }
-
 
 
                 if(TextUtils.isEmpty(et_password.getText().toString())){
@@ -149,60 +145,7 @@ public class SignupActivity extends AppCompatActivity {
                 progressDialog.show();
 
 
-                mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-
-                    @Override
-                    public void onVerificationCompleted(PhoneAuthCredential credential) {
-                        // This callback will be invoked in two situations:
-                        // 1 - Instant verification. In some cases the phone number can be instantly
-                        //     verified without needing to send or enter a verification code.
-                        // 2 - Auto-retrieval. On some devices Google Play services can automatically
-                        //     detect the incoming verification SMS and perform verification without
-                        //     user action.
-
-                        proceed_registration(user, pass);
-                    }
-
-                    @Override
-                    public void onVerificationFailed(FirebaseException e) {
-                        // This callback is invoked in an invalid request for verification is made,
-                        // for instance if the the phone number format is not valid.
-                        Log.w("code", "onVerificationFailed", e);
-
-                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                            // Invalid request
-                            Toast.makeText(getBaseContext(), "Phone number format: +92[country-code][number]", Toast.LENGTH_LONG).show();
-                            // ...
-                        } else if (e instanceof FirebaseTooManyRequestsException) {
-                            // The SMS quota for the project has been exceeded
-                            Toast.makeText(getBaseContext(), "SMS Limit reached.", Toast.LENGTH_SHORT).show();
-                            // ...
-                        }
-                        progressDialog.dismiss();
-                        // Show a message and update the UI
-                        // ...
-                    }
-
-                    @Override
-                    public void onCodeSent(String verificationId,
-                                           PhoneAuthProvider.ForceResendingToken token) {
-                        // The SMS verification code has been sent to the provided phone number, we
-                        // now need to ask the user to enter the code and then construct a credential
-                        // by combining the code with a verification ID.
-                        Log.d("code", "onCodeSent:" + verificationId);
-
-                        // Save verification ID and resending token so we can use them later
-                        //mVerificationId = verificationId;
-                        //mResendToken = token;
-
-                        // ...
-                    }
-                };
-
-
-                startPhoneNumberVerification(et_number.getText().toString());     // OnVerificationStateChangedCallbacks
-
-
+                proceed_registration(user, pass);
 
 
             }
@@ -220,16 +163,7 @@ public class SignupActivity extends AppCompatActivity {
         return matcher.matches();
     }
 
-    private void startPhoneNumberVerification(String phoneNumber) {
-        // [START start_phone_auth]
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phoneNumber,        // Phone number to verify
-                60,                 // Timeout duration
-                TimeUnit.SECONDS,   // Unit of timeout
-                this,               // Activity (for callback binding)
-                mCallbacks);        // OnVerificationStateChangedCallbacks
-        // [END start_phone_auth]
-    }
+
 
     void proceed_registration(final User user, final String pass){
         firebaseAuth.createUserWithEmailAndPassword(user.getEmail(), pass)
@@ -250,6 +184,7 @@ public class SignupActivity extends AppCompatActivity {
                                                 editor.putBoolean("loggedin",true);
                                                 editor.putString("email", user.getEmail());
                                                 editor.putString("password", pass);
+                                                editor.putBoolean("new",true);
                                                 editor.apply();
 
 

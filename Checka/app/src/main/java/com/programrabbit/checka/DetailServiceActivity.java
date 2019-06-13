@@ -358,6 +358,11 @@ public class DetailServiceActivity extends AppCompatActivity implements OnMapRea
                 AlertDialog.Builder b = new AlertDialog.Builder(DetailServiceActivity.this);
                 b.setTitle("Update Problem Level");
                 String[] types = {"No Problem ", "Medium Problem", "High Problem"};
+
+                if(service.getServiceType()==0){
+                    types = new String[]{"Power Available", "No Power"};
+                }
+
                 b.setItems(types, new DialogInterface.OnClickListener() {
 
                     @Override
@@ -370,7 +375,10 @@ public class DetailServiceActivity extends AppCompatActivity implements OnMapRea
                                 break;
                             case 1:
                                 //onCategoryRequested();
-                                updateProblem(1);
+                                if(service.serviceType==0)
+                                    updateProblem(2);
+                                else
+                                    updateProblem(1);
                                 break;
                             case 2:
                                 updateProblem(2);

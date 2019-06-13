@@ -14,7 +14,12 @@
         android:roundIcon="@mipmap/ic_checka_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".CommentsServiceActivity"></activity>
+        <activity android:name=".CheckRateActivity"></activity>
+        <activity android:name=".ServiceMapViewActivity" />
+        <activity android:name=".PriceMapViewActivity" />
+        <activity android:name=".FuelMapViewActivity" />
+        <activity android:name=".PhoneVerificationActivity" />
+        <activity android:name=".CommentsServiceActivity" />
         <activity android:name=".CommentsPriceActivity" />
         <activity android:name=".CommentsFuelActivity" />
         <activity android:name=".DetailPriceActivity" />

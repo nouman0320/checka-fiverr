@@ -60,7 +60,9 @@
             app:layout_behavior="@string/bottom_sheet_behavior"
             app:behavior_hideable="true"
             app:cardElevation="5dp"
-            app:behavior_peekHeight="230dp">
+            app:behavior_peekHeight="320dp">
+
+
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -68,6 +70,52 @@
                 android:descendantFocusability="beforeDescendants"
                 android:focusableInTouchMode="true" >
                 >
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/cl_exchange"
+                    android:layout_width="97dp"
+                    android:layout_height="95dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/layout_radius_3"
+                    app:layout_constraintEnd_toEndOf="@+id/cl_service"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="@+id/cl_service"
+                    app:layout_constraintTop_toBottomOf="@+id/cl_service">
+
+                    <TextView
+                        android:id="@+id/tv_exchange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:text="Rate"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.514"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/iv_exchange" />
+
+                    <ImageView
+                        android:id="@+id/iv_exchange"
+                        android:layout_width="47dp"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:src="@drawable/ic_exchange"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.511"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.186" />
+
+                </android.support.constraint.ConstraintLayout>
 
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/cl_price"
@@ -183,7 +231,7 @@
                     android:layout_height="95dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginRight="14dp"
+                    android:layout_marginRight="8dp"
                     android:background="@drawable/layout_radius_1"
                     app:layout_constraintEnd_toStartOf="@+id/cl_price"
                     app:layout_constraintTop_toBottomOf="@+id/et_search">

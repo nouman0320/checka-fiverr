@@ -12,6 +12,12 @@
         <item>Medium Problem</item>
         <item>High Problem</item>
     </string-array>
+
+    <string-array name="problem_level_electricity">
+        <item>Power available</item>
+        <item>No Power</item>
+    </string-array>
+
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
