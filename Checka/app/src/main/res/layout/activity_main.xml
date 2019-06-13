@@ -129,7 +129,7 @@
                     android:background="@drawable/layout_radius_2"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/et_search">
+                    app:layout_constraintTop_toBottomOf="@+id/cl_search">
 
                     <TextView
                         android:id="@+id/tv_price"
@@ -174,7 +174,7 @@
                     android:layout_marginTop="16dp"
                     android:background="@drawable/layout_radius_3"
                     app:layout_constraintStart_toEndOf="@+id/cl_price"
-                    app:layout_constraintTop_toBottomOf="@+id/et_search">
+                    app:layout_constraintTop_toBottomOf="@+id/cl_search">
 
                     <TextView
                         android:id="@+id/tv_fuel"
@@ -234,7 +234,7 @@
                     android:layout_marginRight="8dp"
                     android:background="@drawable/layout_radius_1"
                     app:layout_constraintEnd_toStartOf="@+id/cl_price"
-                    app:layout_constraintTop_toBottomOf="@+id/et_search">
+                    app:layout_constraintTop_toBottomOf="@+id/cl_search">
 
                     <TextView
                         android:id="@+id/tv_service"
@@ -281,35 +281,28 @@
                         app:layout_constraintTop_toTopOf="@+id/iv_fuel" />
                 </android.support.constraint.ConstraintLayout>
 
-                <EditText
-                    android:id="@+id/et_search"
-                    android:layout_width="333dp"
-                    android:layout_height="41dp"
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/cl_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="40dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
                     android:background="@drawable/layout_radius_4"
-                    android:ems="10"
-                    android:imeOptions="actionSearch"
-                    android:hint="What are you looking for?"
-                    android:inputType="textPersonName"
-                    android:paddingLeft="40dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    >
 
-                <ImageView
-                    android:id="@+id/imageView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginLeft="12dp"
-                    android:layout_marginTop="8dp"
-                    android:src="@drawable/quantum_ic_search_grey600_24"
-                    app:layout_constraintStart_toStartOf="@+id/et_search"
-                    app:layout_constraintTop_toTopOf="@+id/et_search" />
+                    <fragment
+                        android:id="@+id/autocomplete_fragment"
+                        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                        android:layout_width="333dp"
+                        android:layout_height="41dp"
+                        android:hint="Address"/>
+                </android.support.constraint.ConstraintLayout>
 
             </android.support.constraint.ConstraintLayout>
 

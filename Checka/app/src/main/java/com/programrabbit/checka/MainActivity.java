@@ -47,6 +47,7 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -63,6 +64,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -73,18 +75,22 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -121,7 +127,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private ConstraintLayout cl_price;
     private ConstraintLayout cl_rate;
 
-    private EditText et_search;
+
+    AutocompleteSupportFragment autocompleteFragment;
+
+    String search = "";
+
+    //private EditText et_search;
 
 
     private TextView tv_service;
@@ -152,12 +163,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList<Marker> sSearchMarkers = new ArrayList<>();
     ArrayList<Marker> fSearchMarkers = new ArrayList<>();
 
+    String apiKey = "AIzaSyDzx-vWPnVEyrYv93hjxmL4S7e1pUy8-JU";
+
     ConstraintLayout cl_admin;
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
+
+
+    public LatLngBounds toBounds(LatLng center, double radiusInMeters) {
+        double distanceFromCenterToCorner = radiusInMeters * Math.sqrt(2.0);
+        LatLng southwestCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
+        LatLng northeastCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
+        return new LatLngBounds(southwestCorner, northeastCorner);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +197,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if(new_user){
             SharedPreferences.Editor editor = prefs.edit();
             editor.remove("new");
+            editor.putBoolean("new_map", true);
             editor.commit();
         }
 
@@ -197,9 +222,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         tv_fuel.setTypeface(custom_font);
         tv_price.setTypeface(custom_font);
 
-        et_search = findViewById(R.id.et_search);
-        et_search.setTypeface(custom_font);
-        et_search.setSelected(false);
 
         cl_service = findViewById(R.id.cl_service);
         cl_fuel = findViewById(R.id.cl_fuel);
@@ -324,19 +346,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         final AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
 
-        et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    queryAndDisplayMarkers(et_search.getText().toString());
-                    //Toast.makeText(MainActivity.this, "it's not working as expected.. it will show the markers on map", Toast.LENGTH_LONG).show();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-
         priceDatabaseReference = FirebaseDatabase.getInstance().getReference("Price");
         fuelDatabaseReference = FirebaseDatabase.getInstance().getReference("Fuel");
         serviceDatabaseReference = FirebaseDatabase.getInstance().getReference("Service");
@@ -431,9 +440,39 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onTargetClick(TapTargetView view) {
                         super.onTargetClick(view);      // This call is optional
+                        showRates();
                     }
                 });
 
+    }
+
+
+    void showRates(){
+        TapTargetView.showFor(this,                 // `this` is an Activity
+                TapTarget.forView(findViewById(R.id.cl_exchange), "Rates", "Check out the latest exchange rate")
+                        // All options below are optional
+                        .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
+                        .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
+                        .targetCircleColor(R.color.white)   // Specify a color for the target circle
+                        .titleTextSize(20)                  // Specify the size (in sp) of the title text
+                        .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
+                        .descriptionTextSize(10)            // Specify the size (in sp) of the description text
+                        .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
+                        .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
+                        .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
+                        .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
+                        .drawShadow(true)                   // Whether to draw a drop shadow or not
+                        .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                        .tintTarget(true)                   // Whether to tint the target view's color
+                        .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
+                        .icon(this.getResources().getDrawable(R.drawable.ic_currency))                     // Specify a custom drawable to draw as the target
+                        .targetRadius(60),                  // Specify the target radius (in dp)
+                new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);      // This call is optional
+                    }
+                });
     }
 
     @Override
@@ -527,6 +566,44 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                             mLastKnownLocation = task.getResult();
                             if(mLastKnownLocation != null){
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), 18));
+                                Places.initialize(getApplicationContext(), apiKey);
+                                PlacesClient placesClient = Places.createClient(MainActivity.this);
+
+                                // Initialize the AutocompleteSupportFragment.
+                                autocompleteFragment = (AutocompleteSupportFragment)
+                                        getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+// Specify the types of place data to return.
+                                autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
+
+// Set up a PlaceSelectionListener to handle the response.
+
+
+                                LatLng center = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+
+                                Log.d("Place", center.toString());
+
+                                LatLng east = SphericalUtil.computeOffset(center, 10000, 90); // Shift 500 meters to the east
+                                LatLng west = SphericalUtil.computeOffset(center, 10000, 270); // Shift 500 meters to the west
+
+
+                                autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(west, east));
+                                //autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
+                                autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+                                                                                    @Override
+                                                                                    public void onPlaceSelected(@NonNull Place place) {
+                                                                                        // TODO: Get info about the selected place.
+                                                                                        queryAndDisplayMarkers(place.getAddress());
+                                                                                    }
+
+                                                                                    @Override
+                                                                                    public void onError(@NonNull Status status) {
+                                                                                        // TODO: Handle the error.
+                                                                                        Log.i("Place", "An error occurred: " + status);
+                                                                                    }
+                                                                                }
+                                );
+
                             } else {
                                 final LocationRequest locationRequest = LocationRequest.create();
                                 locationRequest.setInterval(10000);
@@ -574,6 +651,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 editor.putBoolean("loggedin",false);
                 editor.remove("email");
                 editor.remove("password");
+                editor.remove("admin");
                 editor.apply();
 
                 Intent mainIntent = new Intent(MainActivity.this, LoginActivity.class);

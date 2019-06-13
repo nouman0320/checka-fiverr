@@ -115,9 +115,8 @@
                     android:layout_height="25dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginLeft="8dp"
-                    android:layout_marginTop="12dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/et_address" />
+                    app:layout_constraintTop_toBottomOf="@+id/autocomplete_fragment" />
 
                 <Spinner
                     android:id="@+id/spinnerProblem"
@@ -142,18 +141,28 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
-                <EditText
-                    android:id="@+id/et_address"
+                <TextView
+                    android:id="@+id/textView6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Search For Address"
+                    app:layout_constraintStart_toStartOf="@+id/et_location_name"
+                    app:layout_constraintTop_toBottomOf="@+id/et_location_name" />
+
+                <fragment
+                    android:id="@+id/autocomplete_fragment"
+                    android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:ems="10"
                     android:hint="Address"
-                    android:inputType="textPersonName"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/et_location_name" />
+                    app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
             </android.support.constraint.ConstraintLayout>
         </ScrollView>

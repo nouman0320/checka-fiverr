@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.preference.PreferenceManager;
@@ -26,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -107,6 +110,16 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean admin = prefs.getBoolean("admin", false);
+        Boolean new_user = prefs.getBoolean("new_map", false);
+
+        if(new_user){
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.remove("new_map");
+            editor.commit();
+        }
+
+
+
         cl_admin = findViewById(R.id.cl_admin);
         if(!admin)
             cl_admin.setVisibility(View.GONE);
@@ -159,8 +172,64 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
 
         databaseReference = FirebaseDatabase.getInstance().getReference("Service");
         firebaseAuth = FirebaseAuth.getInstance();
+        if(new_user){
+            TapTargetView.showFor(this,                 // `this` is an Activity
+                    TapTarget.forView(findViewById(R.id.fab_new), "Add Fuel Update", "Here you can add update about fuel stations")
+                            // All options below are optional
+                            .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
+                            .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
+                            .targetCircleColor(R.color.white)   // Specify a color for the target circle
+                            .titleTextSize(20)                  // Specify the size (in sp) of the title text
+                            .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
+                            .descriptionTextSize(10)            // Specify the size (in sp) of the description text
+                            .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
+                            .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
+                            .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
+                            .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
+                            .drawShadow(true)                   // Whether to draw a drop shadow or not
+                            .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                            .tintTarget(true)                   // Whether to tint the target view's color
+                            .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
+                            .icon(this.getResources().getDrawable(R.drawable.ic_add))                     // Specify a custom drawable to draw as the target
+                            .targetRadius(60),                  // Specify the target radius (in dp)
+                    new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                        @Override
+                        public void onTargetClick(TapTargetView view) {
+                            super.onTargetClick(view);      // This call is optional
+                            showList();
+                        }
+                    });
+        }
+
     }
 
+    void showList(){
+        TapTargetView.showFor(this,                 // `this` is an Activity
+                TapTarget.forView(findViewById(R.id.fab_list_view), "List View", "Here you can see all fuel stations in the list form")
+                        // All options below are optional
+                        .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
+                        .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
+                        .targetCircleColor(R.color.white)   // Specify a color for the target circle
+                        .titleTextSize(20)                  // Specify the size (in sp) of the title text
+                        .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
+                        .descriptionTextSize(10)            // Specify the size (in sp) of the description text
+                        .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
+                        .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
+                        .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
+                        .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
+                        .drawShadow(true)                   // Whether to draw a drop shadow or not
+                        .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                        .tintTarget(true)                   // Whether to tint the target view's color
+                        .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
+                        .icon(this.getResources().getDrawable(R.drawable.ic_view_list))                     // Specify a custom drawable to draw as the target
+                        .targetRadius(60),                  // Specify the target radius (in dp)
+                new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);      // This call is optional
+                    }
+                });
+    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -261,6 +330,8 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
         for(int i=0;i<markers.size();i++){
             markers.get(i).remove();
         }
+
+        markers.clear();
 
         for(int i=0;i<myServiceData.size();i++){
             LatLng latLng = new LatLng(myServiceData.get(i).lat, myServiceData.get(i).lng);

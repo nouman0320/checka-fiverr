@@ -18,6 +18,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,6 +27,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -39,17 +41,26 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.maps.android.SphericalUtil;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import dmax.dialog.SpotsDialog;
@@ -66,10 +77,15 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
     ImageView iv_back;
     FloatingActionButton fab;
 
+    AutocompleteSupportFragment autocompleteFragment;
+
+    String address = "";
 
     EditText et_name;
-    EditText et_address;
+    //EditText et_address;
     EditText et_price;
+
+    String apiKey = "AIzaSyDzx-vWPnVEyrYv93hjxmL4S7e1pUy8-JU";
 
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
@@ -81,12 +97,23 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
+    public LatLngBounds toBounds(LatLng center, double radiusInMeters) {
+        double distanceFromCenterToCorner = radiusInMeters * Math.sqrt(2.0);
+        LatLng southwestCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
+        LatLng northeastCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
+        return new LatLngBounds(southwestCorner, northeastCorner);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_price);
-
         getSupportActionBar().hide();
+
+        Places.initialize(getApplicationContext(), apiKey);
+        PlacesClient placesClient = Places.createClient(this);
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
 
@@ -102,7 +129,7 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
 
 
         et_name = findViewById(R.id.et_location_name);
-        et_address = findViewById(R.id.et_address);
+        //et_address = findViewById(R.id.et_address);
         et_price = findViewById(R.id.et_price);
 
 
@@ -127,7 +154,7 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
             public void onClick(View v) {
 
                 String name = et_name.getText().toString();
-                String address = et_address.getText().toString();
+                //String address = et_address.getText().toString();
                 String prce = et_price.getText().toString();
 
                 int vCount = 0;
@@ -138,7 +165,7 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                 }
 
                 if(TextUtils.isEmpty(address)){
-                    et_address.setError("Address can not be empty");
+                    Toast.makeText(getBaseContext(), "Address can not be empty", Toast.LENGTH_SHORT).show();
                     vCount++;
                 }
 
@@ -285,6 +312,44 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                             mLastKnownLocation = task.getResult();
                             if(mLastKnownLocation != null){
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), 18));
+                                // Initialize the AutocompleteSupportFragment.
+                                autocompleteFragment = (AutocompleteSupportFragment)
+                                        getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+// Specify the types of place data to return.
+                                autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
+
+// Set up a PlaceSelectionListener to handle the response.
+
+
+                                LatLng center = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+
+                                Log.d("Place", center.toString());
+
+                                LatLng east = SphericalUtil.computeOffset(center, 10000, 90); // Shift 500 meters to the east
+                                LatLng west = SphericalUtil.computeOffset(center, 10000, 270); // Shift 500 meters to the west
+
+
+                                autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(west, east));
+                                //autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
+                                autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+                                                                                    @Override
+                                                                                    public void onPlaceSelected(@NonNull Place place) {
+                                                                                        // TODO: Get info about the selected place.
+                                                                                        Log.i("Place", "Address: " + place.getAddress() + ", " + place.getId());
+                                                                                        address=place.getAddress();
+                                                                                    }
+
+                                                                                    @Override
+                                                                                    public void onError(@NonNull Status status) {
+                                                                                        // TODO: Handle the error.
+                                                                                        Log.i("Place", "An error occurred: " + status);
+                                                                                    }
+                                                                                }
+                                );
+
+
+
                             } else {
                                 final LocationRequest locationRequest = LocationRequest.create();
                                 locationRequest.setInterval(10000);

@@ -41,20 +41,26 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.LocationBias;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.maps.android.SphericalUtil;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -97,6 +103,15 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
+    public LatLngBounds toBounds(LatLng center, double radiusInMeters) {
+        double distanceFromCenterToCorner = radiusInMeters * Math.sqrt(2.0);
+        LatLng southwestCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
+        LatLng northeastCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
+        return new LatLngBounds(southwestCorner, northeastCorner);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,29 +121,7 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
         Places.initialize(getApplicationContext(), apiKey);
         PlacesClient placesClient = Places.createClient(this);
 
-        // Initialize the AutocompleteSupportFragment.
-        autocompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-// Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
-
-// Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(@NonNull Place place) {
-                // TODO: Get info about the selected place.
-                Log.i("Place", "Address: " + place.getAddress() + ", " + place.getId());
-                address=place.getAddress();
-            }
-
-            @Override
-            public void onError(@NonNull Status status) {
-                // TODO: Handle the error.
-                Log.i("Place", "An error occurred: " + status);
-            }
-        }
-    );
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
 
@@ -294,6 +287,8 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
 
+
+
         //Toast.makeText(getBaseContext(),"map is ready",
           //      Toast.LENGTH_SHORT).show();
     }
@@ -319,6 +314,46 @@ public class NewFuelActivity extends AppCompatActivity implements OnMapReadyCall
                             mLastKnownLocation = task.getResult();
                             if(mLastKnownLocation != null){
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), 18));
+
+
+                                // Initialize the AutocompleteSupportFragment.
+                                autocompleteFragment = (AutocompleteSupportFragment)
+                                        getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+// Specify the types of place data to return.
+                                autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
+
+// Set up a PlaceSelectionListener to handle the response.
+
+
+                                LatLng center = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+
+                                Log.d("Place", center.toString());
+
+                                LatLng east = SphericalUtil.computeOffset(center, 10000, 90); // Shift 500 meters to the east
+                                LatLng west = SphericalUtil.computeOffset(center, 10000, 270); // Shift 500 meters to the west
+
+
+                                autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(west, east));
+                                //autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
+                                autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+                                                                                    @Override
+                                                                                    public void onPlaceSelected(@NonNull Place place) {
+                                                                                        // TODO: Get info about the selected place.
+                                                                                        Log.i("Place", "Address: " + place.getAddress() + ", " + place.getId());
+                                                                                        address=place.getAddress();
+                                                                                    }
+
+                                                                                    @Override
+                                                                                    public void onError(@NonNull Status status) {
+                                                                                        // TODO: Handle the error.
+                                                                                        Log.i("Place", "An error occurred: " + status);
+                                                                                    }
+                                                                                }
+                                );
+
+
+
                             } else {
                                 final LocationRequest locationRequest = LocationRequest.create();
                                 locationRequest.setInterval(10000);
