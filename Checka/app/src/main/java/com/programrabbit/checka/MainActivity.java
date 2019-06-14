@@ -204,7 +204,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         et_search = findViewById(R.id.et_search);
-        et_search.setSelected(false);
+        et_search.setFocusable(true);
+        //et_search.setSelected(false);
 
 
         et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
