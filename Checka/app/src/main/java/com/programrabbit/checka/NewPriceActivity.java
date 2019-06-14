@@ -182,6 +182,11 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                     vCount++;
                 }
 
+                if(TextUtils.isEmpty(et_price.getText().toString())){
+                    et_price.setError("Price is required");
+                    vCount++;
+                }
+
                 if(vCount>0)
                     return;
 

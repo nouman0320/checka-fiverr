@@ -49,7 +49,8 @@
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="1dp" />
+                tools:layout_editor_absoluteY="1dp"
+                tools:ignore="MissingConstraints" />
         </android.support.constraint.ConstraintLayout>
 
         <android.support.v4.widget.NestedScrollView
@@ -113,7 +114,8 @@
                         app:layout_constraintHorizontal_bias="0.511"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.186" />
+                        app:layout_constraintVertical_bias="0.186"
+                        tools:ignore="VectorDrawableCompat" />
 
                 </android.support.constraint.ConstraintLayout>
 
@@ -129,7 +131,7 @@
                     android:background="@drawable/layout_radius_2"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/cl_search">
+                    app:layout_constraintTop_toBottomOf="@+id/et_search">
 
                     <TextView
                         android:id="@+id/tv_price"
@@ -162,7 +164,8 @@
                         app:layout_constraintHorizontal_bias="0.511"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.186" />
+                        app:layout_constraintVertical_bias="0.186"
+                        tools:ignore="VectorDrawableCompat" />
                 </android.support.constraint.ConstraintLayout>
 
                 <android.support.constraint.ConstraintLayout
@@ -174,7 +177,7 @@
                     android:layout_marginTop="16dp"
                     android:background="@drawable/layout_radius_3"
                     app:layout_constraintStart_toEndOf="@+id/cl_price"
-                    app:layout_constraintTop_toBottomOf="@+id/cl_search">
+                    app:layout_constraintTop_toBottomOf="@+id/et_search">
 
                     <TextView
                         android:id="@+id/tv_fuel"
@@ -207,7 +210,8 @@
                         app:layout_constraintHorizontal_bias="0.511"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.186" />
+                        app:layout_constraintVertical_bias="0.186"
+                        tools:ignore="VectorDrawableCompat" />
                 </android.support.constraint.ConstraintLayout>
 
                 <ImageView
@@ -222,7 +226,8 @@
                     android:src="@drawable/ic_bar"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="VectorDrawableCompat" />
 
 
                 <android.support.constraint.ConstraintLayout
@@ -234,7 +239,7 @@
                     android:layout_marginRight="8dp"
                     android:background="@drawable/layout_radius_1"
                     app:layout_constraintEnd_toStartOf="@+id/cl_price"
-                    app:layout_constraintTop_toBottomOf="@+id/cl_search">
+                    app:layout_constraintTop_toBottomOf="@+id/et_search">
 
                     <TextView
                         android:id="@+id/tv_service"
@@ -267,7 +272,8 @@
                         app:layout_constraintHorizontal_bias="0.511"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.186" />
+                        app:layout_constraintVertical_bias="0.186"
+                        tools:ignore="VectorDrawableCompat" />
 
                     <ImageView
                         android:id="@+id/iv_fuel4"
@@ -278,31 +284,42 @@
                         android:layout_marginTop="16dp"
                         android:src="@drawable/ic_water_drop"
                         app:layout_constraintStart_toStartOf="@+id/iv_fuel"
-                        app:layout_constraintTop_toTopOf="@+id/iv_fuel" />
+                        app:layout_constraintTop_toTopOf="@+id/iv_fuel"
+                        tools:ignore="VectorDrawableCompat" />
                 </android.support.constraint.ConstraintLayout>
 
-                <android.support.constraint.ConstraintLayout
-                    android:id="@+id/cl_search"
+               <EditText
+                   android:layout_width="333dp"
+                   android:layout_height="41dp"
+                   android:id="@+id/et_search"
+                   android:layout_marginStart="8dp"
+                   android:layout_marginLeft="8dp"
+                   android:layout_marginTop="40dp"
+                   android:layout_marginEnd="8dp"
+                   android:layout_marginRight="8dp"
+                   android:background="@drawable/layout_radius_4"
+                   android:ems="10"
+                   android:imeOptions="actionSearch"
+                   android:hint="What are you looking for?"
+                   android:inputType="textPersonName"
+                   android:paddingLeft="40dp"
+                   app:layout_constraintEnd_toEndOf="parent"
+                   app:layout_constraintStart_toStartOf="parent"
+                   app:layout_constraintTop_toTopOf="parent"
+                   />
+
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="40dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
-                    android:background="@drawable/layout_radius_4"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    >
+                    android:id="@+id/imageView3"
 
-                    <fragment
-                        android:id="@+id/autocomplete_fragment"
-                        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-                        android:layout_width="333dp"
-                        android:layout_height="41dp"
-                        android:hint="Address"/>
-                </android.support.constraint.ConstraintLayout>
+                    android:layout_marginStart="12dp"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/quantum_ic_search_grey600_24"
+                    app:layout_constraintStart_toStartOf="@+id/et_search"
+                    app:layout_constraintTop_toTopOf="@+id/et_search"
+                    />
 
             </android.support.constraint.ConstraintLayout>
 
@@ -314,7 +331,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|center_vertical"
-        android:src="@drawable/ic_locationsearch" />
+        android:src="@drawable/ic_locationsearch"
+        tools:ignore="VectorDrawableCompat" />
 
         <ImageView
             android:id="@+id/iv_menu"
@@ -323,7 +341,8 @@
             android:layout_marginLeft="15dp"
             android:layout_marginTop="15dp"
             android:padding="5dp"
-            android:src="@drawable/ic_menu" />
+            android:src="@drawable/ic_menu"
+            tools:ignore="VectorDrawableCompat" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_help"
@@ -335,7 +354,8 @@
             android:src="@drawable/ic_info"
             app:backgroundTint="@color/white"
             app:layout_anchor="@+id/map"
-            app:layout_anchorGravity="right|top" />
+            app:layout_anchorGravity="right|top"
+            tools:ignore="VectorDrawableCompat" />
 
 
     </android.support.design.widget.CoordinatorLayout>

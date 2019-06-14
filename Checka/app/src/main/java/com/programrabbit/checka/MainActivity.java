@@ -132,11 +132,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     FloatingActionButton fab_help;
 
 
-    AutocompleteSupportFragment autocompleteFragment;
 
-    String search = "";
 
-    //private EditText et_search;
+    private EditText et_search;
 
 
     private TextView tv_service;
@@ -204,6 +202,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             editor.putBoolean("new_map", true);
             editor.commit();
         }
+
+        et_search = findViewById(R.id.et_search);
+        et_search.setSelected(false);
+
+
+        et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    queryAndDisplayMarkers(et_search.getText().toString());
+                    //Toast.makeText(MainActivity.this, "it's not working as expected.. it will show the markers on map", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+                return false;
+            }
+        });
 
 
 
@@ -585,44 +599,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                             mLastKnownLocation = task.getResult();
                             if(mLastKnownLocation != null){
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), 18));
-                                Places.initialize(getApplicationContext(), apiKey);
-                                PlacesClient placesClient = Places.createClient(MainActivity.this);
-
-                                // Initialize the AutocompleteSupportFragment.
-                                autocompleteFragment = (AutocompleteSupportFragment)
-                                        getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-
-// Specify the types of place data to return.
-                                autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS));
-
-// Set up a PlaceSelectionListener to handle the response.
-
-
-                                LatLng center = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
-
-                                Log.d("Place", center.toString());
-
-                                LatLng east = SphericalUtil.computeOffset(center, 15000, 90); // Shift 500 meters to the east
-                                LatLng west = SphericalUtil.computeOffset(center, 15000, 270); // Shift 500 meters to the west
-
-
-                                autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(west, east));
-                                //autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
-                                autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-                                                                                    @Override
-                                                                                    public void onPlaceSelected(@NonNull Place place) {
-                                                                                        // TODO: Get info about the selected place.
-                                                                                        queryAndDisplayMarkers(place.getAddress());
-                                                                                    }
-
-                                                                                    @Override
-                                                                                    public void onError(@NonNull Status status) {
-                                                                                        // TODO: Handle the error.
-                                                                                        Log.i("Place", "An error occurred: " + status);
-                                                                                    }
-                                                                                }
-                                );
-
                             } else {
                                 final LocationRequest locationRequest = LocationRequest.create();
                                 locationRequest.setInterval(10000);
@@ -840,6 +816,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 else{
                     centerPos = new LatLng(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude);
+                    Toast.makeText(getApplicationContext(), "We don't have what you are looking for", Toast.LENGTH_LONG).show();
                 }
 
 
@@ -849,6 +826,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
                 mMap.moveCamera(center);
                 mMap.animateCamera(zoom);
+
+                //mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
 
             @Override
