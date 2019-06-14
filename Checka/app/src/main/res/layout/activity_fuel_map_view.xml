@@ -98,4 +98,16 @@
         app:layout_anchorGravity="right|bottom"
         app:srcCompat="@drawable/ic_add" />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="160dp"
+        android:clickable="true"
+        app:backgroundTint="@color/white"
+        app:layout_anchor="@+id/map"
+        app:layout_anchorGravity="right|bottom"
+        app:srcCompat="@drawable/ic_info" />
+
 </android.support.design.widget.CoordinatorLayout>

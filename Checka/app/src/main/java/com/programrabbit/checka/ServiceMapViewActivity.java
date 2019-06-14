@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -77,6 +78,9 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
     FloatingActionButton fab_list;
     FloatingActionButton fab_new;
 
+
+    FloatingActionButton fab_help;
+
     ArrayList<Service> myServiceData = new ArrayList<>();
 
     ArrayList<String> keys = new ArrayList<>();
@@ -89,6 +93,8 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
     private AlertDialog progressDialog;
 
     ConstraintLayout cl_admin;
+
+
 
 
 
@@ -107,6 +113,14 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
         getSupportActionBar().hide();
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
+
+        fab_help = findViewById(R.id.fab_help);
+        fab_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGuide();
+            }
+        });
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean admin = prefs.getBoolean("admin", false);
@@ -173,34 +187,38 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
         databaseReference = FirebaseDatabase.getInstance().getReference("Service");
         firebaseAuth = FirebaseAuth.getInstance();
         if(new_user){
-            TapTargetView.showFor(this,                 // `this` is an Activity
-                    TapTarget.forView(findViewById(R.id.fab_new), "Add Fuel Update", "Here you can add update about fuel stations")
-                            // All options below are optional
-                            .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
-                            .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
-                            .targetCircleColor(R.color.white)   // Specify a color for the target circle
-                            .titleTextSize(20)                  // Specify the size (in sp) of the title text
-                            .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
-                            .descriptionTextSize(10)            // Specify the size (in sp) of the description text
-                            .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
-                            .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
-                            .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
-                            .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
-                            .drawShadow(true)                   // Whether to draw a drop shadow or not
-                            .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                            .tintTarget(true)                   // Whether to tint the target view's color
-                            .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
-                            .icon(this.getResources().getDrawable(R.drawable.ic_add))                     // Specify a custom drawable to draw as the target
-                            .targetRadius(60),                  // Specify the target radius (in dp)
-                    new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
-                        @Override
-                        public void onTargetClick(TapTargetView view) {
-                            super.onTargetClick(view);      // This call is optional
-                            showList();
-                        }
-                    });
+            startGuide();
         }
 
+    }
+
+    void startGuide(){
+        TapTargetView.showFor(this,                 // `this` is an Activity
+                TapTarget.forView(findViewById(R.id.fab_new), "Add Service Update", "Here you can add update about Services such as electricity, water and sewage etc.")
+                        // All options below are optional
+                        .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
+                        .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
+                        .targetCircleColor(R.color.white)   // Specify a color for the target circle
+                        .titleTextSize(20)                  // Specify the size (in sp) of the title text
+                        .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
+                        .descriptionTextSize(10)            // Specify the size (in sp) of the description text
+                        .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
+                        .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
+                        .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
+                        .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
+                        .drawShadow(true)                   // Whether to draw a drop shadow or not
+                        .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                        .tintTarget(true)                   // Whether to tint the target view's color
+                        .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
+                        .icon(this.getResources().getDrawable(R.drawable.ic_add))                     // Specify a custom drawable to draw as the target
+                        .targetRadius(60),                  // Specify the target radius (in dp)
+                new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);      // This call is optional
+                        showList();
+                    }
+                });
     }
 
     void showList(){
@@ -339,13 +357,21 @@ public class ServiceMapViewActivity extends AppCompatActivity implements OnMapRe
                     .position(latLng));
 
 
-            if(myServiceData.get(i).getServiceType() == 0)
+            if(myServiceData.get(i).getServiceType() == 0 && myServiceData.get(i).getProblemLevel()==0)
                 temp.setIcon(bitmapDescriptorFromVector(ServiceMapViewActivity.this, R.drawable.ic_flash));
+            else if(myServiceData.get(i).getServiceType() == 0 && myServiceData.get(i).getProblemLevel()==1)
+                temp.setIcon(bitmapDescriptorFromVector(ServiceMapViewActivity.this, R.drawable.ic_flash));
+            else if(myServiceData.get(i).getServiceType() == 0 && myServiceData.get(i).getProblemLevel()==2)
+                temp.setIcon(bitmapDescriptorFromVector(ServiceMapViewActivity.this, R.drawable.ic_flash_unavailable));
             else if(myServiceData.get(i).getServiceType() == 1)
                 temp.setIcon(bitmapDescriptorFromVector(ServiceMapViewActivity.this, R.drawable.ic_water_drop));
             else if(myServiceData.get(i).getServiceType() == 2)
                 temp.setIcon(bitmapDescriptorFromVector(ServiceMapViewActivity.this, R.drawable.ic_sewage));
             markers.add(temp);
+
+
+
+
 
             Log.d("Marker", "marker added");
         }

@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -128,6 +129,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private ConstraintLayout cl_rate;
 
 
+    FloatingActionButton fab_help;
+
+
     AutocompleteSupportFragment autocompleteFragment;
 
     String search = "";
@@ -218,6 +222,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         tv_fuel = findViewById(R.id.tv_fuel);
         tv_price = findViewById(R.id.tv_price);
 
+
         tv_service.setTypeface(custom_font);
         tv_fuel.setTypeface(custom_font);
         tv_price.setTypeface(custom_font);
@@ -240,6 +245,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         btnMoreOptions.setVisibility(View.GONE);
+
+
+        fab_help = findViewById(R.id.fab_help);
+        fab_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGuide();
+            }
+        });
 
 
         iv_menu = findViewById(R.id.iv_menu);
@@ -353,36 +367,41 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         if(new_user){
-            TapTargetView.showFor(this,                 // `this` is an Activity
-                    TapTarget.forView(findViewById(R.id.cl_fuel), "Fuel", "Want to check where there is fuel near you? Click on the Fuel icon")
-                            // All options below are optional
-                            .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
-                            .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
-                            .targetCircleColor(R.color.white)   // Specify a color for the target circle
-                            .titleTextSize(20)                  // Specify the size (in sp) of the title text
-                            .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
-                            .descriptionTextSize(10)            // Specify the size (in sp) of the description text
-                            .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
-                            .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
-                            .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
-                            .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
-                            .drawShadow(true)                   // Whether to draw a drop shadow or not
-                            .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                            .tintTarget(true)                   // Whether to tint the target view's color
-                            .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
-                            .icon(this.getResources().getDrawable(R.drawable.ic_fuel))                     // Specify a custom drawable to draw as the target
-                            .targetRadius(60),                  // Specify the target radius (in dp)
-                    new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
-                        @Override
-                        public void onTargetClick(TapTargetView view) {
-                            super.onTargetClick(view);      // This call is optional
-                            showPrice();
-                        }
-                    });
+            startGuide();
         }
 
 
 
+    }
+
+
+    void startGuide(){
+        TapTargetView.showFor(this,                 // `this` is an Activity
+                TapTarget.forView(findViewById(R.id.cl_fuel), "Fuel", "Want to check where there is fuel near you? Click on the Fuel icon")
+                        // All options below are optional
+                        .outerCircleColor(R.color.colorPrimary)      // Specify a color for the outer circle
+                        .outerCircleAlpha(0.96f)            // Specify the alpha amount for the outer circle
+                        .targetCircleColor(R.color.white)   // Specify a color for the target circle
+                        .titleTextSize(20)                  // Specify the size (in sp) of the title text
+                        .titleTextColor(R.color.colorPrimaryText)      // Specify the color of the title text
+                        .descriptionTextSize(10)            // Specify the size (in sp) of the description text
+                        .descriptionTextColor(R.color.colorPrimaryText)  // Specify the color of the description text
+                        .textColor(R.color.colorPrimaryText)            // Specify a color for both the title and description text
+                        .textTypeface(Typeface.SANS_SERIF)  // Specify a typeface for the text
+                        .dimColor(R.color.colorPrimaryText)            // If set, will dim behind the view with 30% opacity of the given color
+                        .drawShadow(true)                   // Whether to draw a drop shadow or not
+                        .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                        .tintTarget(true)                   // Whether to tint the target view's color
+                        .transparentTarget(false)           // Specify whether the target is transparent (displays the content underneath)
+                        .icon(this.getResources().getDrawable(R.drawable.ic_fuel))                     // Specify a custom drawable to draw as the target
+                        .targetRadius(60),                  // Specify the target radius (in dp)
+                new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);      // This call is optional
+                        showPrice();
+                    }
+                });
     }
 
     void showPrice(){
@@ -583,8 +602,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 Log.d("Place", center.toString());
 
-                                LatLng east = SphericalUtil.computeOffset(center, 10000, 90); // Shift 500 meters to the east
-                                LatLng west = SphericalUtil.computeOffset(center, 10000, 270); // Shift 500 meters to the west
+                                LatLng east = SphericalUtil.computeOffset(center, 15000, 90); // Shift 500 meters to the east
+                                LatLng west = SphericalUtil.computeOffset(center, 15000, 270); // Shift 500 meters to the west
 
 
                                 autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(west, east));

@@ -381,8 +381,8 @@ public class NewServiceActivity extends AppCompatActivity implements OnMapReadyC
 
                                 Log.d("Place", center.toString());
 
-                                LatLng east = SphericalUtil.computeOffset(center, 10000, 90); // Shift 500 meters to the east
-                                LatLng west = SphericalUtil.computeOffset(center, 10000, 270); // Shift 500 meters to the west
+                                LatLng east = SphericalUtil.computeOffset(center, 15000, 90); // Shift 500 meters to the east
+                                LatLng west = SphericalUtil.computeOffset(center, 15000, 270); // Shift 500 meters to the west
 
 
                                 autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(west, east));
