@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginTop="168dp"
+            android:layout_marginTop="200dp"
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -150,7 +150,7 @@
                     android:layout_marginTop="8dp"
                     android:text="Search For Address"
                     app:layout_constraintStart_toStartOf="@+id/et_location_name"
-                    app:layout_constraintTop_toBottomOf="@+id/et_location_name" />
+                    app:layout_constraintTop_toBottomOf="@+id/tv_address" />
 
                 <fragment
                     android:id="@+id/autocomplete_fragment"
@@ -163,6 +163,16 @@
                     android:hint="Address"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView6" />
+                <TextView
+                    android:id="@+id/tv_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Wait to get the address from map"
+                    app:layout_constraintStart_toStartOf="@+id/et_location_name"
+                    app:layout_constraintTop_toBottomOf="@+id/et_location_name" />
 
             </android.support.constraint.ConstraintLayout>
         </ScrollView>

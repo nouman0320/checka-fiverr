@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -58,10 +61,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.SphericalUtil;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -80,6 +85,8 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
     AutocompleteSupportFragment autocompleteFragment;
 
     String address = "";
+
+    TextView tv_address;
 
     EditText et_name;
     //EditText et_address;
@@ -116,6 +123,7 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
         PlacesClient placesClient = Places.createClient(this);
 
         progressDialog = new SpotsDialog(this, R.style.Custom);
+        tv_address = findViewById(R.id.tv_address);
 
         iv_back = findViewById(R.id.iv_back);
         fab= findViewById(R.id.fab);
@@ -312,6 +320,23 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                             mLastKnownLocation = task.getResult();
                             if(mLastKnownLocation != null){
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), 18));
+
+                                address = getAddress(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
+                                tv_address.setText(address);
+
+                                mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                                    @Override
+                                    public void onCameraIdle() {
+                                        // Cleaning all the markers.
+                                        if (mMap != null) {
+
+                                            address = getAddress(new LatLng(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude));
+                                            tv_address.setText(address);
+                                        }
+
+                                    }
+                                });
+
                                 // Initialize the AutocompleteSupportFragment.
                                 autocompleteFragment = (AutocompleteSupportFragment)
                                         getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
@@ -338,6 +363,7 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                                                                                         // TODO: Get info about the selected place.
                                                                                         Log.i("Place", "Address: " + place.getAddress() + ", " + place.getId());
                                                                                         address=place.getAddress();
+                                                                                        tv_address.setText(address);
                                                                                     }
 
                                                                                     @Override
@@ -376,5 +402,33 @@ public class NewPriceActivity extends AppCompatActivity implements OnMapReadyCal
                         }
                     }
                 });
+    }
+
+    String getAddress(LatLng latLng){
+        Geocoder gc = new Geocoder(this);
+
+        if(gc.isPresent()){
+            List<Address> list = null;
+            try {
+                list = gc.getFromLocation(latLng.latitude, latLng.longitude,1);
+                Address address = list.get(0);
+
+                /*
+                StringBuffer str = new StringBuffer();
+                str.append("Name: " + address.getLocality() + "\n");
+                str.append("Sub-Admin Ares: " + address.getSubAdminArea() + "\n");
+                str.append("Admin Area: " + address.getAdminArea() + "\n");
+                str.append("Country: " + address.getCountryName() + "\n");
+                str.append("Country Code: " + address.getCountryCode() + "\n");*/
+
+                String strAddress = address.getAddressLine(0);
+                return strAddress;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "Unable to find the address";
+            }
+        }
+        return "";
     }
 }
